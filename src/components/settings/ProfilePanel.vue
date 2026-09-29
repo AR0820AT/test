@@ -16,7 +16,7 @@ const themName = computed({
 })
 
 function reset(role: Role): void {
-  profile.setNickname(role, role === 'me' ? '我' : '小卡')
+  profile.setNickname(role, role === 'me' ? 'L' : 'S')
 }
 </script>
 

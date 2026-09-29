@@ -28,11 +28,19 @@
   --glass-blur: 18px;
   --glass-sat: 150%;
 
+  /* 输入框聚焦：玻璃内部发光（不是描一圈硬边），深色用红光，浅色用蓝光 */
+  --input-bg-focus: rgba(255, 255, 255, 0.1);
+  --focus-ring: rgba(226, 62, 82, 0.42);
+  --focus-inner: rgba(226, 62, 82, 0.24);
+
   /* 双方气泡样式完全一致 */
   --bubble-them: rgba(255, 255, 255, 0.08);
   --bubble-them-text: #f2e7e8;
 
   --danger: #ff5f5f;
+  /* 在线状态的小圆点：深色用深红 + 红光，浅色用浅蓝 + 蓝光（见 light 主题） */
+  --online: #cf2b3f;
+  --online-glow: rgba(226, 62, 82, 0.6);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -50,7 +58,7 @@
   --fs-lg: calc(var(--fs-base) + 2px);
   --fs-xl: calc(var(--fs-base) + 4px);
 
-  --nav-height: 48px;
+  --nav-height: 58px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
@@ -80,7 +88,51 @@ html[data-theme='dark'] {
   --text-2: #ab9496;
   --text-3: #776265;
 
+  --online: #cf2b3f;
+  --online-glow: rgba(226, 62, 82, 0.62);
+
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* 浅色：白色打底 + 蓝色点缀，和深色那套暗红黑完全分开 */
+html[data-theme='light'] {
+  color-scheme: light;
+
+  --accent: #2f6fd0;
+  --accent-soft: rgba(47, 111, 208, 0.12);
+  --accent-contrast: #ffffff;
+
+  --bg: #eef3fb;
+  --nav-bg: rgba(255, 255, 255, 0.74);
+  --drawer-bg: rgba(255, 255, 255, 0.88);
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-2: rgba(255, 255, 255, 0.82);
+  --input-bg: rgba(255, 255, 255, 0.92);
+
+  --text: #16233a;
+  --text-2: #4c5d78;
+  --text-3: #8496b0;
+
+  --border: rgba(20, 45, 90, 0.1);
+  --border-strong: rgba(20, 45, 90, 0.18);
+  --glass-border: rgba(20, 45, 90, 0.13);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  --input-bg-focus: rgba(255, 255, 255, 0.98);
+  --focus-ring: rgba(58, 122, 208, 0.4);
+  --focus-inner: rgba(58, 122, 208, 0.2);
+
+  --bubble-them: #ffffff;
+  --bubble-them-text: #16233a;
+
+  --danger: #cf3340;
+  /* 浅色：在线用浅蓝 + 柔和蓝光 */
+  --online: #86b1f2;
+  --online-glow: rgba(58, 122, 208, 0.45);
+
+  --shadow-sm: 0 1px 2px rgba(18, 40, 80, 0.1);
+  --shadow-md: 0 10px 30px rgba(18, 40, 80, 0.14);
+  --shadow-lg: 0 18px 40px rgba(18, 40, 80, 0.18);
 }
 
 /* 关闭毛玻璃：模糊归零 + 表面换成实色，低配机也能流畅 */
@@ -106,4 +158,17 @@ html[data-theme='dark'][data-glass='off'] {
   --surface-2: #1e1517;
   --input-bg: #1a1214;
   --bubble-them: #201618;
+}
+
+/* 浅色 + 关毛玻璃：纯白实色，别被上面的深色实色覆盖 */
+html[data-theme='light'][data-glass='off'] {
+  --nav-bg: #ffffff;
+  --drawer-bg: #ffffff;
+  --surface: #f6f9fe;
+  --surface-2: #ffffff;
+  --input-bg: #ffffff;
+  --bubble-them: #ffffff;
+  --border: rgba(20, 45, 90, 0.12);
+  --border-strong: rgba(20, 45, 90, 0.2);
+  --glass-border: rgba(20, 45, 90, 0.13);
 }

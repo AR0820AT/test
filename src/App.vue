@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { watchEffect } from 'vue'
+import { watch, watchEffect } from 'vue'
 import { brain } from '@/engine/brain'
+import { usePresenceStore } from '@/stores/usePresenceStore'
 import { FONT_SCALES, useSettingsStore } from '@/stores/useSettingsStore'
 import { useLockStore } from '@/stores/useLockStore'
 import { useTheme } from '@/composables/useTheme'
 import NavBar from '@/components/layout/NavBar.vue'
 import ChatView from '@/components/chat/ChatView.vue'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
-import CtxMenu from '@/components/common/CtxMenu.vue'
 import ToastHost from '@/components/common/ToastHost.vue'
 import LockScreen from '@/components/lock/LockScreen.vue'
 
 const settings = useSettingsStore()
+const presence = usePresenceStore()
 const lock = useLockStore()
 const { isDark } = useTheme()
 
@@ -20,7 +21,9 @@ let started = false
 function applyTheme(): void {
   const dark = isDark.value
   document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0b0708' : '#120c0e')
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', dark ? '#0b0708' : '#eef3fb')
 }
 
 watchEffect(applyTheme)
@@ -29,12 +32,37 @@ watchEffect(applyTheme)
 watchEffect(() => {
   if (lock.unlocked && !started) {
     started = true
+    presence.start()
     brain.start()
   }
 })
 
+// 对方上下线变化时，主动消息的排程跟着变（离线就不再主动找你）
+watch(
+  () => presence.themOnline,
+  () => {
+    if (started) brain.restartProactive()
+  },
+)
+
+/** #rrggbb → rgba(r, g, b, alpha)：强调色要拿来做柔光 */
+function withAlpha(hex: string, alpha: number): string {
+  const int = Number.parseInt(hex.replace('#', ''), 16)
+  return `rgba(${(int >> 16) & 255}, ${(int >> 8) & 255}, ${int & 255}, ${alpha})`
+}
+
+// 深色用设置里选的强调色；浅色走 tokens 里的蓝色，避免红配白太跳
+// 聚焦发光也跟着强调色走，这样输入框发的光永远是同一个色系
 watchEffect(() => {
-  document.documentElement.style.setProperty('--accent', settings.ui.accent)
+  const root = document.documentElement
+  const keys = ['--accent', '--focus-ring', '--focus-inner']
+  if (!isDark.value) {
+    keys.forEach((key) => root.style.removeProperty(key))
+    return
+  }
+  root.style.setProperty('--accent', settings.ui.accent)
+  root.style.setProperty('--focus-ring', withAlpha(settings.ui.accent, 0.42))
+  root.style.setProperty('--focus-inner', withAlpha(settings.ui.accent, 0.24))
 })
 
 watchEffect(() => {
@@ -65,7 +93,6 @@ watchEffect(() => {
       <NavBar />
       <ChatView />
       <SettingsDrawer />
-      <CtxMenu />
     </template>
 
     <transition name="lock">
@@ -132,6 +159,20 @@ watchEffect(() => {
 
 html[data-theme='dark'] .blob {
   opacity: 0.34;
+}
+
+/* 浅色：背景光斑换成蓝调，跟白底搭 */
+html[data-theme='light'] .blob {
+  opacity: 0.4;
+}
+
+html[data-theme='light'] .blob-b {
+  background: #7fa9e8;
+}
+
+html[data-theme='light'] .blob-c {
+  background: #c3d8f7;
+  opacity: 0.55;
 }
 
 html[data-glass='off'] .aurora {

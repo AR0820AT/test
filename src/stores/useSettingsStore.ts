@@ -32,10 +32,6 @@ export function defaultSettings(): Settings {
       minDelaySec: 2,
       maxDelaySec: 8,
       ignoreChance: 20,
-      lineGapMinSec: 0.8,
-      lineGapMaxSec: 2.6,
-      typingMinSec: 1.1,
-      typingMaxSec: 3.2,
     },
     proactive: {
       enabled: true,
@@ -43,7 +39,7 @@ export function defaultSettings(): Settings {
       maxIntervalMin: 60,
     },
     draw: {
-      combo: true,
+      maxCombo: 4,
     },
     ui: {
       theme: 'auto',
@@ -64,9 +60,16 @@ export const useSettingsStore = defineStore('settings', () => {
     defaultSettings() as unknown as Record<string, unknown>,
   ) as unknown as Settings
 
-  // 旧版本存过「暂停」和「气泡小尖角」，现在都去掉了：清掉，避免出现在备份文件里
+  // 旧版本存过「暂停」「气泡小尖角」「在线概率」「正在输入时长」「多连发间隔」，
+  // 现在都去掉了：清掉，避免出现在备份文件里
   delete (settings.value as Settings & { paused?: boolean }).paused
+  delete (settings.value as Settings & { presence?: unknown }).presence
   delete (settings.value.ui as Settings['ui'] & { bubbleTail?: boolean }).bubbleTail
+  delete (settings.value.draw as Settings['draw'] & { combo?: boolean }).combo
+  delete (settings.value.reply as Settings['reply'] & { typingMinSec?: number }).typingMinSec
+  delete (settings.value.reply as Settings['reply'] & { typingMaxSec?: number }).typingMaxSec
+  delete (settings.value.reply as Settings['reply'] & { lineGapMinSec?: number }).lineGapMinSec
+  delete (settings.value.reply as Settings['reply'] & { lineGapMaxSec?: number }).lineGapMaxSec
 
   // 主题换成暗红黑后，旧配色（已不在色板里）自动回落到默认色
   if (!ACCENTS.some((item) => item.value === settings.value.ui.accent)) {

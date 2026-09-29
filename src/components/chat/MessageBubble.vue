@@ -2,12 +2,16 @@
 import { computed, type Ref } from 'vue'
 import type { Message } from '@/types'
 import { useAssetUrl } from '@/composables/useAssetUrl'
+import { useQuoting } from '@/composables/useQuoting'
+import { useChatStore } from '@/stores/useChatStore'
 import { useProfileStore } from '@/stores/useProfileStore'
 import { useUiStore } from '@/stores/useUiStore'
 
 const props = defineProps<{ message: Message }>()
 
 const ui = useUiStore()
+const chat = useChatStore()
+const quoting = useQuoting()
 const profile = useProfileStore()
 
 const mine = computed(() => props.message.role === 'me')
@@ -17,34 +21,31 @@ const assetId = computed(() => props.message.assetId ?? '')
 const url = useAssetUrl(assetId as Ref<string | null | undefined>)
 const quote = computed(() => props.message.quote ?? null)
 
-/** 长按 450ms 弹出菜单（桌面端右键同效） */
-let pressTimer: ReturnType<typeof setTimeout> | undefined
-let moved = false
+/** 双击阈值；iOS 自带的 dblclick 不可靠，触摸端自己判定 */
+const DOUBLE_TAP_MS = 320
+let lastTapAt = 0
+let lastQuoteAt = 0
 
-function pointOf(event: TouchEvent | MouseEvent): { x: number; y: number } {
-  const touch = (event as TouchEvent).touches?.[0]
-  if (touch) return { x: touch.clientX, y: touch.clientY }
-  const mouse = event as MouseEvent
-  return { x: mouse.clientX, y: mouse.clientY }
+/** 双击气泡 / 右键 = 直接引用这条消息，不再弹菜单 */
+function quoteThis(): void {
+  const now = Date.now()
+  if (now - lastQuoteAt < 600) return
+  lastQuoteAt = now
+  const ref = chat.quoteRefOf(props.message.id)
+  if (!ref) return
+  quoting.set(ref)
+  ui.toast('已引用这条消息')
+  if (navigator.vibrate) navigator.vibrate(8)
 }
 
-function startPress(event: TouchEvent | MouseEvent): void {
-  moved = false
-  pressTimer = setTimeout(() => {
-    const { x, y } = pointOf(event)
-    ui.openContextMenu({ messageId: props.message.id, x, y })
-    if (navigator.vibrate) navigator.vibrate(12)
-  }, 450)
-}
-
-function cancelPress(): void {
-  if (pressTimer) clearTimeout(pressTimer)
-  pressTimer = undefined
-}
-
-function onContextMenu(event: MouseEvent): void {
-  event.preventDefault()
-  ui.openContextMenu({ messageId: props.message.id, x: event.clientX, y: event.clientY })
+function onTouchEnd(): void {
+  const now = Date.now()
+  const isDoubleTap = now - lastTapAt < DOUBLE_TAP_MS
+  lastTapAt = now
+  if (isDoubleTap) {
+    lastTapAt = 0
+    quoteThis()
+  }
 }
 </script>
 
@@ -53,7 +54,7 @@ function onContextMenu(event: MouseEvent): void {
     <div class="stack">
       <div class="who">{{ who }}</div>
 
-      <div class="bubble" @touchstart.passive="startPress" @touchend="cancelPress" @touchmove="moved = true; cancelPress()" @touchcancel="cancelPress" @mousedown="startPress" @mouseup="cancelPress" @mouseleave="cancelPress" @contextmenu="onContextMenu">
+      <div class="bubble" @touchend="onTouchEnd" @contextmenu.prevent="quoteThis" @dblclick="quoteThis">
         <div v-if="quote" class="quote">
           <span class="quote-name">{{ quote.name }}：</span>
           <span class="quote-text">{{ quote.digest }}</span>
@@ -120,6 +121,10 @@ function onContextMenu(event: MouseEvent): void {
   box-shadow: var(--shadow-sm);
   word-break: break-word;
   white-space: pre-wrap;
+  /* iOS：禁掉系统长按的选择/共享菜单，别和我们自己的长按菜单抢；复制走菜单里的按钮 */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat));
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat));
 }

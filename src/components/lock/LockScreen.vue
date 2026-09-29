@@ -140,6 +140,31 @@ function press(key: string): void {
   transform: scale(0.96);
 }
 
+/* 浅色主题：锁屏跟着换成白蓝，不再一直是深色 */
+html[data-theme='light'] .lock {
+  background: radial-gradient(120% 80% at 50% 0%, #ffffff 0%, #eaf1fb 45%, #dce7f8 100%);
+  color: #16233a;
+}
+
+html[data-theme='light'] .dots span {
+  border-color: rgba(20, 45, 90, 0.35);
+}
+
+html[data-theme='light'] .dots span.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+html[data-theme='light'] .key {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(20, 45, 90, 0.12);
+  color: #16233a;
+}
+
+html[data-theme='light'] .key:active {
+  background: rgba(47, 111, 208, 0.16);
+}
+
 @keyframes shake {
   0%,
   100% {

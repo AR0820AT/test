@@ -8,10 +8,6 @@ import { useSettingsStore } from '@/stores/useSettingsStore'
 
 const settings = useSettingsStore()
 
-function patchDraw(patch: Partial<typeof settings.settings.draw>): void {
-  settings.settings.draw = { ...settings.settings.draw, ...patch }
-}
-
 // 主动消息的间隔改了要立刻重排下一次时间
 watch(
   () => settings.proactive,
@@ -35,16 +31,6 @@ watch(
         <span class="dash">~</span>
         <NumberField v-model="settings.settings.reply.maxDelaySec" :min="0" :max="120" suffix="秒" />
       </Row>
-      <Row label="「正在输入」" hint="每条消息显示多久，长句子会再久一点">
-        <NumberField v-model="settings.settings.reply.typingMinSec" :min="0" :max="10" :step="0.2" suffix="秒" />
-        <span class="dash">~</span>
-        <NumberField v-model="settings.settings.reply.typingMaxSec" :min="0" :max="10" :step="0.2" suffix="秒" />
-      </Row>
-      <Row label="多连发间隔" hint="连着说几句时，两句之间的停顿">
-        <NumberField v-model="settings.settings.reply.lineGapMinSec" :min="0" :max="10" :step="0.2" suffix="秒" />
-        <span class="dash">~</span>
-        <NumberField v-model="settings.settings.reply.lineGapMaxSec" :min="0" :max="10" :step="0.2" suffix="秒" />
-      </Row>
     </section>
 
     <section class="section">
@@ -61,11 +47,13 @@ watch(
 
     <section class="section">
       <div class="sec-title">抽卡方式</div>
-      <Row label="拼卡成句" hint="随机抽几张卡、打乱顺序拼在一起，也会把词插进句子中间">
-        <Switch :model-value="settings.draw.combo" @update:model-value="patchDraw({ combo: $event })" />
+      <Row label="最大拼卡数量" hint="一句最多用几张卡拼；设为 1 就是抽到什么发什么">
+        <NumberField v-model="settings.settings.draw.maxCombo" :min="1" :max="6" suffix="张" />
       </Row>
       <div class="sec-body">
-        <p class="muted">抽卡固定为纯随机。关掉拼卡后，就是抽到什么发什么。</p>
+        <p class="muted">
+          抽卡固定为纯随机；拼卡时随机抽几张、随机顺序拼，也会把词插进句子中间。张数越少越经常只发一张卡。
+        </p>
       </div>
     </section>
 

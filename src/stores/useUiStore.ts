@@ -4,12 +4,6 @@ import { uid } from '@/utils/id'
 
 export type SettingsTab = 'menu' | 'profile' | 'cards' | 'stickers' | 'reply' | 'appearance' | 'data'
 
-export interface ContextMenuState {
-  messageId: string
-  x: number
-  y: number
-}
-
 export interface ToastItem {
   id: string
   text: string
@@ -18,7 +12,6 @@ export interface ToastItem {
 export const useUiStore = defineStore('ui', () => {
   const drawerOpen = ref(false)
   const tab = ref<SettingsTab>('menu')
-  const contextMenu = ref<ContextMenuState | null>(null)
   const toasts = ref<ToastItem[]>([])
 
   function openDrawer(next: SettingsTab = 'menu'): void {
@@ -34,14 +27,6 @@ export const useUiStore = defineStore('ui', () => {
     tab.value = next
   }
 
-  function openContextMenu(state: ContextMenuState): void {
-    contextMenu.value = state
-  }
-
-  function closeContextMenu(): void {
-    contextMenu.value = null
-  }
-
   function toast(text: string, duration = 1800): void {
     const item: ToastItem = { id: uid('t_'), text }
     toasts.value.push(item)
@@ -53,13 +38,10 @@ export const useUiStore = defineStore('ui', () => {
   return {
     drawerOpen,
     tab,
-    contextMenu,
     toasts,
     openDrawer,
     closeDrawer,
     setTab,
-    openContextMenu,
-    closeContextMenu,
     toast,
   }
 })

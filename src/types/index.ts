@@ -93,12 +93,6 @@ export interface ReplySettings {
   maxDelaySec: number
   /** 已读不回的概率（0-100） */
   ignoreChance: number
-  /** 多连发时每条之间的随机间隔（秒） */
-  lineGapMinSec: number
-  lineGapMaxSec: number
-  /** 每条消息发出前「正在输入」的随机时长（秒） */
-  typingMinSec: number
-  typingMaxSec: number
 }
 
 export interface ProactiveSettings {
@@ -110,8 +104,8 @@ export interface ProactiveSettings {
 }
 
 export interface DrawSettings {
-  /** 拼卡成句：随机抽几张卡、打乱顺序拼在一起（关掉就永远只发单张卡原文） */
-  combo: boolean
+  /** 一句里最多用几张卡拼（1 = 抽到什么发什么） */
+  maxCombo: number
 }
 
 /** 字号档位：小 / 标准 / 大 */

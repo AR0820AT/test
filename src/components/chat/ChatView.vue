@@ -299,11 +299,18 @@ onMounted(() => {
   resize: none;
   overflow-y: auto;
   line-height: 1.4;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
 }
 
+/* 聚焦：玻璃内壁亮起来（内发光），而不是描一圈实心色边 */
 .input:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--focus-ring);
+  background: var(--input-bg-focus);
+  box-shadow:
+    inset 0 0 0 1px var(--focus-ring),
+    inset 0 0 15px 2px var(--focus-inner),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .send {
