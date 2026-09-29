@@ -231,7 +231,7 @@ function resetLibrary(): void {
 .name.letter {
   flex: none;
   min-width: 22px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .count {

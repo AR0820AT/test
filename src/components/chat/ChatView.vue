@@ -312,7 +312,7 @@ onMounted(() => {
 
 .quote-bar .name {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 500;
   flex: none;
 }
 

@@ -193,7 +193,7 @@ function onTouchEnd(): void {
 }
 
 .quote-name {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .quote-text {

@@ -4,6 +4,7 @@
  *
  * 用法：node scripts/fetch-zh-font.mjs
  */
+import { existsSync, statSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -14,6 +15,9 @@ const UA =
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = path.join(root, 'public/fonts/zh')
+
+/** 中文每个字重都声明一遍：只写 500 的话，页面上写 600 的地方 Safari 会合成/回落成别的字形 */
+const WEIGHTS = [400, 500, 600, 700]
 
 const css = await (await fetch(CSS_URL, { headers: { 'User-Agent': UA } })).text()
 
@@ -36,9 +40,14 @@ async function worker() {
     const next = queue.shift()
     if (!next) return
     const [index, face] = next
+    const file = path.join(outDir, `p${index}.woff2`)
+    if (existsSync(file)) {
+      total += statSync(file).size
+      continue
+    }
     const res = await fetch(face.url, { headers: { 'User-Agent': UA } })
     const buf = Buffer.from(await res.arrayBuffer())
-    await writeFile(path.join(outDir, `p${index}.woff2`), buf)
+    await writeFile(file, buf)
     total += buf.length
   }
 }
@@ -48,9 +57,11 @@ const out = [
   '/* 自动生成，别手改：node scripts/fetch-zh-font.mjs */',
   '/* 思源宋体（Noto Serif SC）按 unicode-range 切成若干片，浏览器只下载用得到的那几片 */',
   '',
-  ...faces.map(
-    (face, index) =>
-      `@font-face {\n  font-family: 'Noto Serif SC';\n  font-style: normal;\n  font-weight: 500;\n  font-display: swap;\n  src: url('./zh/p${index}.woff2') format('woff2');\n  unicode-range: ${face.range};\n}`,
+  ...faces.flatMap((face, index) =>
+    WEIGHTS.map(
+      (weight) =>
+        `@font-face {\n  font-family: 'Noto Serif SC';\n  font-style: normal;\n  font-weight: ${weight};\n  font-display: swap;\n  src: url('./zh/p${index}.woff2') format('woff2');\n  unicode-range: ${face.range};\n}`,
+    ),
   ),
   '',
 ].join('\n')
