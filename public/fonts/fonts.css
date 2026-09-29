@@ -1,39 +1,11 @@
 /**
  * 自托管字体：跟页面同一个域名，不依赖外网 CDN，手机上也能稳定显示
- * 思源宋体（中文正文）+ Cormorant Garamond（英文正文）+ Pirata One（标题/名字牌）
+ * 中文字体（思源宋体）按 unicode-range 分片放在 zh.css 里，浏览器只下载用得到的那几片
+ * Cormorant Garamond（英文正文）+ Pirata One（标题/名字牌）
  *
  * 注意：字重一条条单独写，不用「400 700」那种范围写法 —— 部分手机浏览器
- * 不认范围写法，会把整条 @font-face 丢掉，中文就退回系统默认字体了
+ * 不认范围写法，会把整条 @font-face 丢掉，字就退回系统默认字体了
  */
-@font-face {
-  font-family: 'Noto Serif SC';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('./noto-serif-sc-500.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Noto Serif SC';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('./noto-serif-sc-500.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Noto Serif SC';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('./noto-serif-sc-500.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Noto Serif SC';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('./noto-serif-sc-500.woff2') format('woff2');
-}
-
 @font-face {
   font-family: 'Cormorant Garamond';
   font-style: normal;

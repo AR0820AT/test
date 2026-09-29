@@ -6,7 +6,7 @@ import { useStickerStore } from '@/stores/useStickerStore'
 import { useUiStore } from '@/stores/useUiStore'
 import { clearAssets } from '@/storage/assets'
 import { estimateSize } from '@/storage/persist'
-import { chineseFontApplied } from '@/utils/fonts'
+import { chineseFontStatus, type FontStatus } from '@/utils/fonts'
 
 const chat = useChatStore()
 const cardStore = useCardStore()
@@ -18,13 +18,9 @@ const confirmWipe = ref(false)
 const sizeKb = computed(() => Math.max(1, Math.round(estimateSize() / 1024)))
 
 /** 中文有没有真的用上思源宋体：显示出来方便排查手机上的字体问题 */
-const fontOk = ref(false)
-onMounted(() => {
-  const check = (): void => {
-    fontOk.value = chineseFontApplied()
-  }
-  void (document.fonts ? document.fonts.ready.then(check) : Promise.resolve()).then(check)
-  window.setTimeout(check, 1500)
+const fontStatus = ref<FontStatus>('loading')
+onMounted(async () => {
+  fontStatus.value = await chineseFontStatus()
 })
 
 /** 清空聊天与表情：字卡库、双方昵称和所有设置都保留 */
@@ -91,7 +87,13 @@ function clearChat(): void {
       <div class="sec-title">字体</div>
       <div class="sec-body">
         <p class="muted">
-          中文字体：{{ fontOk ? '思源宋体（自托管，正常）' : '没加载出来，当前显示的是系统字体' }}
+          中文字体：{{
+            fontStatus === 'loaded'
+              ? '思源宋体（自托管，正常）'
+              : fontStatus === 'loading'
+                ? '还在下载…'
+                : '没加载到，当前显示的是系统字体'
+          }}
         </p>
       </div>
     </section>
