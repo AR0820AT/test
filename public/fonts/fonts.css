@@ -1,0 +1,27 @@
+/**
+ * 自托管字体：跟页面同一个域名，不依赖外网 CDN，手机上也能稳定显示
+ * 思源宋体（中文正文）+ Cormorant Garamond（英文正文）+ Pirata One（标题/名字牌）
+ */
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./noto-serif-sc-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./cormorant-garamond-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Pirata One';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./pirata-one-400.woff2') format('woff2');
+}
