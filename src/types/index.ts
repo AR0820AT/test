@@ -40,12 +40,21 @@ export interface QuoteRef {
   digest: string
 }
 
+/** 一句里来自不同字卡的片段：只用来显示深浅不同的颜色，不展示来源本身 */
+export interface MessageSegment {
+  text: string
+  /** 第几张卡（同一条消息内递增），决定颜色深浅 */
+  source: number
+}
+
 export interface Message {
   id: string
   role: Role
   kind: MsgKind
   /** 文字内容（text 类型） */
   text?: string
+  /** 拼卡时才会有：来自不同字卡的分段；没有就整句一色 */
+  segments?: MessageSegment[]
   /** IndexedDB 中的图片 id（sticker / image 类型） */
   assetId?: string
   quote?: QuoteRef | null

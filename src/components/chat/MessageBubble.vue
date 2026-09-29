@@ -20,6 +20,8 @@ const who = computed(() => profile.nameOf(props.message.role))
 const assetId = computed(() => props.message.assetId ?? '')
 const url = useAssetUrl(assetId as Ref<string | null | undefined>)
 const quote = computed(() => props.message.quote ?? null)
+/** 拼卡来的消息才有分段：每段按来源显示深浅不同的颜色 */
+const segments = computed(() => props.message.segments ?? [])
 
 /** 双击阈值；iOS 自带的 dblclick 不可靠，触摸端自己判定 */
 const DOUBLE_TAP_MS = 320
@@ -60,7 +62,17 @@ function onTouchEnd(): void {
           <span class="quote-text">{{ quote.digest }}</span>
         </div>
 
-        <span v-if="message.kind === 'text'" class="text">{{ message.text }}</span>
+        <span v-if="message.kind === 'text'" class="text"
+          ><template v-if="segments.length"
+            ><span
+              v-for="(segment, index) in segments"
+              :key="index"
+              class="seg"
+              :class="`s${segment.source % 4}`"
+              >{{ segment.text }}</span
+            ></template
+          ><template v-else>{{ message.text }}</template></span
+        >
 
         <img
           v-else-if="url"
@@ -138,6 +150,19 @@ function onTouchEnd(): void {
 
 .muted {
   color: var(--text-2);
+}
+
+/* 一句里来自不同字卡的片段：深浅递增，一眼能看出是拼出来的 */
+.seg.s1 {
+  opacity: 0.78;
+}
+
+.seg.s2 {
+  opacity: 0.62;
+}
+
+.seg.s3 {
+  opacity: 0.48;
 }
 
 .pic {

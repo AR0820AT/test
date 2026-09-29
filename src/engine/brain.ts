@@ -1,7 +1,7 @@
 import type { CardGroup, CardItem } from '@/types'
 import { delay } from '@/utils/format'
 import { pickRandom, pickWeighted, pickWeightedIndex, randRange } from './random'
-import { stitch } from './compose'
+import { joinSegments, stitch, type Segment } from './compose'
 import { useCardStore } from '@/stores/useCardStore'
 import { useChatStore } from '@/stores/useChatStore'
 import { usePresenceStore } from '@/stores/usePresenceStore'
@@ -32,6 +32,12 @@ const RECALL_CHANCE_OFFLINE = 66
 /** 撤回只在发出后 10 秒内发生，最早 1.5 秒（太快像手滑） */
 const RECALL_WINDOW_SEC = 10
 const RECALL_MIN_SEC = 1.5
+
+/** 组装好的一条要发出去的消息：拼卡时带来源分段 */
+interface ComposedLine {
+  text: string
+  segments?: Segment[]
+}
 
 /**
  * 抽字卡引擎：负责「什么时候发」「发什么」
@@ -72,20 +78,25 @@ class ChatBrain {
     return pickWeightedIndex(COMBO_SIZE_WEIGHTS.slice(0, limit)) + 1
   }
 
-  /** 组装一条消息：随机卡数 → 随机抽卡 → 随机顺序拼在一起 */
-  private composeLine(): string[] {
+  /** 组装一条消息：随机卡数 → 随机抽卡 → 随机顺序拼在一起（拼的多张卡会带来源分段） */
+  private composeLine(): ComposedLine[] {
     const size = this.comboSize()
 
     // 抽到什么发什么：原样输出（多行卡就分多条发）
     if (size === 1) {
       const card = this.draw()
-      return card ? card.lines : []
+      return card ? card.lines.map((text) => ({ text })) : []
     }
 
     const cards = this.drawMany(size)
     if (!cards.length) return []
-    const text = stitch(cards.flatMap((card) => card.lines))
-    return text ? [text] : []
+    // 每张卡的每一行都记住来自第几张卡，界面上显示成深浅不同的颜色
+    const pieces = cards.flatMap((card, source) =>
+      card.lines.map((text) => ({ text, source })),
+    )
+    const segments = stitch(pieces)
+    const text = joinSegments(segments)
+    return text ? [{ text, segments }] : []
   }
 
   /** 说一句（一张卡可能是多行），按「正在输入 → 发出」的节奏送出去 */
@@ -102,7 +113,11 @@ class ChatBrain {
         randRange(TYPING_MIN_SEC, TYPING_MAX_SEC) + Math.min(1.6, lines[i].length * 0.025)
       await delay(Math.max(300, typing * 1000))
       chat.typing = false
-      const sent = chat.send({ role: 'them', text: lines[i] })
+      const sent = chat.send({
+        role: 'them',
+        text: lines[i].text,
+        segments: lines[i].segments,
+      })
       this.maybeRecall(sent.id)
     }
   }

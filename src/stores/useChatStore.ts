@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { CardGroup, CardItem, Message, QuoteRef, Role, Sticker } from '@/types'
+import type { CardGroup, CardItem, Message, MessageSegment, QuoteRef, Role, Sticker } from '@/types'
 import { makeDigest } from '@/utils/format'
 import { uid } from '@/utils/id'
 import { usePersisted } from '@/storage/persist'
@@ -28,6 +28,7 @@ export const useChatStore = defineStore('chat', () => {
     assetId?: string
     kind?: Message['kind']
     quote?: QuoteRef | null
+    segments?: MessageSegment[]
   }): Message {
     const kind = input.kind ?? (input.assetId ? 'image' : 'text')
     return {
@@ -37,11 +38,19 @@ export const useChatStore = defineStore('chat', () => {
       text: input.text,
       assetId: input.assetId,
       quote: input.quote ?? null,
+      segments: input.segments?.length ? input.segments : undefined,
       createdAt: Date.now(),
     }
   }
 
-  function send(input: { role: Role; text?: string; assetId?: string; kind?: Message['kind']; quote?: QuoteRef | null }): Message {
+  function send(input: {
+    role: Role
+    text?: string
+    assetId?: string
+    kind?: Message['kind']
+    quote?: QuoteRef | null
+    segments?: MessageSegment[]
+  }): Message {
     return push(createMessage(input))
   }
 
