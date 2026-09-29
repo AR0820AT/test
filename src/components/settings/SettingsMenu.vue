@@ -53,7 +53,9 @@ const entries = computed<Entry[]>(() => [
     <button class="btn primary block" @click="brain.drawNow()">戳戳对方</button>
     <button class="btn block" @click="lockScreen()">立即锁定屏幕</button>
 
-    <p class="muted">所有数据只保存在这台设备的浏览器里，不会上传。</p>
+    <p class="muted">
+      所有数据只保存在这台设备的浏览器里，不会上传。每次重新打开、刷新，或从后台切回来，都要重新输一次密码。
+    </p>
   </div>
 </template>
 

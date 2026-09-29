@@ -65,6 +65,11 @@ watchEffect(() => {
   root.style.setProperty('--focus-inner', withAlpha(settings.ui.accent, 0.24))
 })
 
+// 切到后台（回到桌面、切走标签页）就重新上锁，再进来要重新输一次密码
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) lock.lock()
+})
+
 watchEffect(() => {
   document.documentElement.dataset.anim = settings.ui.animations ? 'on' : 'off'
 })

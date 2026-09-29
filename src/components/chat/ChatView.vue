@@ -11,6 +11,7 @@ import { useProfileStore } from '@/stores/useProfileStore'
 import { useStickerStore } from '@/stores/useStickerStore'
 import { useUiStore } from '@/stores/useUiStore'
 import { useQuoting } from '@/composables/useQuoting'
+import { useSpeechInput } from '@/composables/useSpeechInput'
 import { formatTime, needTimeDivider } from '@/utils/format'
 import type { Message, Sticker } from '@/types'
 
@@ -21,6 +22,9 @@ const ui = useUiStore()
 const quoting = useQuoting()
 
 const draft = ref('')
+const speech = useSpeechInput()
+/** 语音已经定稿的文字；中间结果另外拼在后面实时显示 */
+const voiceBase = ref('')
 const panel = ref<'none' | 'emoji' | 'sticker'>('none')
 const scroller = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLTextAreaElement | null>(null)
@@ -28,6 +32,42 @@ const inputEl = ref<HTMLTextAreaElement | null>(null)
 const stickBottom = ref(true)
 
 const canSend = computed(() => draft.value.trim().length > 0)
+const placeholder = computed(() => (speech.listening.value ? '正在听…' : '说点什么…'))
+
+/** 定稿 + 中间结果拼起来的实时草稿 */
+function voiceDraft(): string {
+  return voiceBase.value + speech.interim.value
+}
+
+function toggleVoice(): void {
+  if (speech.listening.value) {
+    speech.stop()
+    draft.value = voiceBase.value
+    voiceBase.value = ''
+    void nextTick(() => {
+      autosize()
+      inputEl.value?.focus()
+    })
+    return
+  }
+
+  voiceBase.value = draft.value
+  speech.start({
+    onFinal(text: string) {
+      voiceBase.value = voiceBase.value ? `${voiceBase.value}${text}` : text
+      draft.value = voiceDraft()
+    },
+    onError(message: string) {
+      ui.toast(message)
+    },
+  })
+  if (speech.listening.value) ui.toast('听着呢，说完点一下麦克风', 1600)
+}
+
+/** 手动改了输入框就以手写的为准，后面识别到的接在它后面 */
+function onDraftInput(): void {
+  if (speech.listening.value) voiceBase.value = draft.value
+}
 
 function needDivider(index: number): boolean {
   const prev = chat.messages[index - 1]
@@ -67,6 +107,10 @@ function clearQuote(): void {
 }
 
 function sendText(): void {
+  if (speech.listening.value) {
+    speech.stop()
+    voiceBase.value = ''
+  }
   const text = draft.value.trim()
   if (!text) return
   chat.send({ role: 'me', text, quote: quoting.quoting.value ?? null })
@@ -114,6 +158,14 @@ async function drawNow(): Promise<void> {
 }
 
 watch(draft, () => void nextTick(autosize))
+// 边说边把中间结果填进输入框
+watch(
+  () => speech.interim.value,
+  () => {
+    if (!speech.listening.value) return
+    draft.value = voiceDraft()
+  },
+)
 watch(
   () => [chat.messages.length, chat.typing] as const,
   () => {
@@ -163,12 +215,23 @@ onMounted(() => {
           ref="inputEl"
           v-model="draft"
           class="input no-scrollbar"
+          :class="{ listening: speech.listening.value }"
           rows="1"
-          placeholder="说点什么…"
+          :placeholder="placeholder"
+          @input="onDraftInput"
           @focus="panel = 'none'"
           @keydown.enter.exact.prevent="sendText"
         />
 
+        <button
+          v-if="speech.supported"
+          class="tool"
+          :class="{ on: speech.listening.value }"
+          :aria-label="speech.listening.value ? '停止语音输入' : '语音输入'"
+          @click="toggleVoice"
+        >
+          <Icon name="mic" />
+        </button>
         <button class="tool" aria-label="戳戳对方" @click="drawNow">
           <Icon name="dice" />
         </button>
@@ -198,12 +261,12 @@ onMounted(() => {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 10px 0 6px;
+  padding: 8px 0 4px;
   -webkit-overflow-scrolling: touch;
 }
 
 .divider {
-  margin: 10px auto 6px;
+  margin: 7px auto 4px;
   text-align: center;
   font-size: var(--fs-sm);
   color: var(--text-3);
@@ -217,7 +280,7 @@ onMounted(() => {
 }
 
 .tail {
-  height: 8px;
+  height: 6px;
   text-align: center;
   font-size: calc(var(--fs-base) - 4px);
   color: var(--text-3);
@@ -300,6 +363,37 @@ onMounted(() => {
   overflow-y: auto;
   line-height: 1.4;
   transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+/* 语音输入中：跟聚焦一样的玻璃内发光，并轻轻呼吸 */
+.input.listening {
+  border-color: var(--focus-ring);
+  background: var(--input-bg-focus);
+  box-shadow:
+    inset 0 0 0 1px var(--focus-ring),
+    inset 0 0 15px 2px var(--focus-inner),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.tool.on {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* 正在听：图标轻微呼吸，提示还在收音 */
+.tool.on .icon {
+  animation: breathe 1.3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 /* 聚焦：玻璃内壁亮起来（内发光），而不是描一圈实心色边 */

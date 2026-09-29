@@ -2,10 +2,14 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import { installNoZoom } from './composables/useNoZoom'
+import { ensureChineseFont } from './utils/fonts'
 import './styles/tokens.css'
 import './styles/base.css'
 
 createApp(App).use(createPinia()).mount('#app')
+
+// 中文字体在手机上经常加载不出来，加载失败就换 CDN 再试一次
+ensureChineseFont()
 
 // 禁止双击放大与双指缩放，避免聊天界面被撑变形
 installNoZoom()

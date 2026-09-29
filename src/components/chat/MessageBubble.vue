@@ -79,7 +79,7 @@ function onTouchEnd(): void {
 .row {
   display: flex;
   align-items: flex-start;
-  padding: 3px 12px;
+  padding: 2px 12px;
   animation: pop-in 0.22s ease both;
 }
 
@@ -99,7 +99,7 @@ function onTouchEnd(): void {
 }
 
 .who {
-  margin: 0 4px 3px;
+  margin: 0 4px 2px;
   font-family: var(--font-display);
   font-size: var(--fs-sm);
   letter-spacing: 0.04em;
@@ -113,7 +113,7 @@ function onTouchEnd(): void {
 .bubble {
   position: relative;
   max-width: 100%;
-  padding: 9px 12px;
+  padding: 7px 11px;
   border-radius: var(--bubble-radius);
   background: var(--bubble-them);
   color: var(--bubble-them-text);
@@ -133,7 +133,7 @@ function onTouchEnd(): void {
 
 .text {
   font-size: var(--fs-base);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .muted {
@@ -156,8 +156,8 @@ function onTouchEnd(): void {
 }
 
 .quote {
-  margin: -2px 0 6px;
-  padding: 6px 8px;
+  margin: -2px 0 5px;
+  padding: 5px 8px;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.06);
   font-size: var(--fs-sm);

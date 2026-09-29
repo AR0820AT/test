@@ -16,8 +16,13 @@
     <!-- 字体：思源宋体 Noto Serif SC（中文 500/600）+ Cormorant Garamond（英文正文，古典衬线）+
          Pirata One（哥特风 Blackletter，用于标题与名字牌）。加载失败时自动回落到系统宋体 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc/500.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc/600.css" />
+    <!-- 中文字体分片多、体积大：不阻塞首屏，先按系统宋体渲染，字体到位后自动替换 -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc/500.css"
+      media="print"
+      onload="this.media='all'"
+    />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond/500.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond/600.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/pirata-one/400.css" />
