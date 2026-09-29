@@ -25,6 +25,8 @@ const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
 <style scoped>
 .seg {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   padding: 2px;
   border-radius: 10px;
   background: var(--surface);
@@ -33,6 +35,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: T] }>()
 
 .item {
   padding: 5px 10px;
+  white-space: nowrap;
   border-radius: 8px;
   font-size: 13px;
   color: var(--text-2);

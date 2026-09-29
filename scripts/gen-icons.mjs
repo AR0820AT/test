@@ -60,10 +60,11 @@ function encodePng(size, rgba) {
 
 /* ---------------- 绘制 ---------------- */
 
-const GREEN_A = [18, 212, 122]
-const GREEN_B = [7, 193, 96]
+/* 暗红 → 黑 的渐变底色，与界面主色调一致 */
+const RED_A = [150, 32, 44]
+const RED_B = [12, 8, 9]
 const WHITE = [255, 255, 255]
-const ACCENT = [7, 193, 96]
+const ACCENT = [176, 40, 54]
 
 function paint(px, size, x, y, color) {
   if (x < 0 || y < 0 || x >= size || y >= size) return
@@ -142,9 +143,9 @@ function drawIcon(size, options = {}) {
   fillRoundRect(px, size, 0, 0, size, size, radius, (x, y) => {
     const t = (x / size + y / size) / 2
     return [
-      Math.round(GREEN_A[0] + (GREEN_B[0] - GREEN_A[0]) * t),
-      Math.round(GREEN_A[1] + (GREEN_B[1] - GREEN_A[1]) * t),
-      Math.round(GREEN_A[2] + (GREEN_B[2] - GREEN_A[2]) * t),
+      Math.round(RED_A[0] + (RED_B[0] - RED_A[0]) * t),
+      Math.round(RED_A[1] + (RED_B[1] - RED_A[1]) * t),
+      Math.round(RED_A[2] + (RED_B[2] - RED_A[2]) * t),
       255,
     ]
   })

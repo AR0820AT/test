@@ -44,8 +44,9 @@ const stickers = computed(() => stickerStore.stickers)
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 12px;
-  max-height: 220px;
+  max-height: min(220px, 32vh);
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .cell {

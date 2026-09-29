@@ -12,13 +12,30 @@ body,
   -webkit-text-size-adjust: 100%;
 }
 
+/* 用 dvh 兜底：手机地址栏收起/展开时也能铺满且不被裁切 */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #app {
+    height: 100dvh;
+  }
+}
+
+html {
+  overflow: hidden;
+}
+
 body {
+  /* 钉死视口：整个界面不会跟着手指平移 */
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   font-size: 16px;
   line-height: 1.5;
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   /* 禁止双击缩放，同时不影响滚动 */
   touch-action: manipulation;
@@ -28,6 +45,12 @@ body {
 .frost {
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
+
+/* 内部滚动区：滚到尽头不要把整页带跑（橡皮筋） */
+.scroller,
+.no-scrollbar {
+  overscroll-behavior: contain;
 }
 
 button {
@@ -235,4 +258,38 @@ html[data-anim='off'] *::after {
 
 .icon-btn-sm.danger {
   color: var(--danger);
+}
+
+/* ---------- 屏幕自适应 ---------- */
+/* 窄屏：压缩间距，保证一行放得下 */
+@media (max-width: 360px) {
+  body {
+    font-size: 15px;
+  }
+
+  .panel {
+    gap: 12px;
+    padding: 10px 10px calc(22px + var(--safe-bottom));
+  }
+
+  .row {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .btn {
+    min-height: 36px;
+    font-size: 13px;
+  }
+}
+
+/* 矮屏（小屏手机 / 横屏）：压缩纵向占位 */
+@media (max-height: 680px) {
+  :root {
+    --nav-height: 44px;
+  }
+
+  .panel {
+    gap: 10px;
+  }
 }

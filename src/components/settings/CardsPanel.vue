@@ -293,4 +293,20 @@ function resetLibrary(): void {
 .icon-btn-sm:disabled {
   opacity: 0.35;
 }
+
+/* 窄屏：收窄层级缩进，保证一行放得下开关和权重 */
+@media (max-width: 360px) {
+  .level-2 {
+    padding-left: 10px;
+  }
+
+  .level-3 {
+    padding-left: 18px;
+  }
+
+  .grp {
+    gap: 6px;
+    padding: 8px;
+  }
+}
 </style>

@@ -24,7 +24,8 @@ const emit = defineEmits<{ pick: [value: string] }>()
   gap: 2px;
   padding: 8px 6px;
   overflow-y: auto;
-  max-height: 220px;
+  overscroll-behavior: contain;
+  max-height: min(220px, 32vh);
 }
 
 .emoji {

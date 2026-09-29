@@ -20,7 +20,7 @@ let started = false
 function applyTheme(): void {
   const dark = isDark.value
   document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#17181b' : '#ededed')
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0b0708' : '#120c0e')
 }
 
 watchEffect(applyTheme)
@@ -109,8 +109,8 @@ watchEffect(() => {
   right: -14vw;
   width: 58vw;
   height: 58vw;
-  background: #7c5cff;
-  opacity: 0.42;
+  background: #7a1220;
+  opacity: 0.5;
   animation: drift-b 26s ease-in-out infinite alternate;
 }
 
@@ -119,8 +119,8 @@ watchEffect(() => {
   right: -20vw;
   width: 46vw;
   height: 46vw;
-  background: #23b3d8;
-  opacity: 0.35;
+  background: #2b0a12;
+  opacity: 0.6;
   animation: drift-a 30s ease-in-out infinite alternate-reverse;
 }
 

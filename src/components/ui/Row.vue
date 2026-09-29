@@ -18,7 +18,8 @@ withDefaults(defineProps<{ label: string; hint?: string }>(), { hint: '' })
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   padding: 11px 12px;
   border-bottom: 1px solid var(--border);
 }
@@ -48,5 +49,6 @@ withDefaults(defineProps<{ label: string; hint?: string }>(), { hint: '' })
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
 }
 </style>

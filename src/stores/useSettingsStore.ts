@@ -10,12 +10,12 @@ export interface AccentOption {
 
 /** 可选强调色：切换即可整体换肤 */
 export const ACCENTS: AccentOption[] = [
-  { name: '微信绿', value: '#07c160' },
-  { name: '雾松青', value: '#12b3a8' },
-  { name: '晴空蓝', value: '#2f80ed' },
-  { name: '丁香紫', value: '#8b5cf6' },
-  { name: '玫瑰粉', value: '#f0599a' },
-  { name: '暖阳橙', value: '#f59042' },
+  { name: '暗红', value: '#a01f2c' },
+  { name: '酒红', value: '#7b1723' },
+  { name: '砖红', value: '#b8492f' },
+  { name: '绯红', value: '#d9293c' },
+  { name: '紫檀', value: '#7a2148' },
+  { name: '玄黑', value: '#2b2b30' },
 ]
 
 export function defaultSettings(): Settings {
@@ -57,6 +57,11 @@ export const useSettingsStore = defineStore('settings', () => {
     settings.value as unknown as Record<string, unknown>,
     defaultSettings() as unknown as Record<string, unknown>,
   ) as unknown as Settings
+
+  // 主题换成暗红黑后，旧配色（已不在色板里）自动回落到默认色
+  if (!ACCENTS.some((item) => item.value === settings.value.ui.accent)) {
+    settings.value.ui.accent = ACCENTS[0].value
+  }
 
   const reply = computed(() => settings.value.reply)
   const proactive = computed(() => settings.value.proactive)
