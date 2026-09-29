@@ -105,9 +105,12 @@ function onContextMenu(event: MouseEvent): void {
   border-radius: var(--bubble-radius);
   background: var(--bubble-them);
   color: var(--bubble-them-text);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-sm);
   word-break: break-word;
   white-space: pre-wrap;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat));
 }
 
 .bubble.tail::before {
@@ -125,6 +128,8 @@ function onContextMenu(event: MouseEvent): void {
 .row.mine .bubble {
   background: var(--bubble-me);
   color: var(--bubble-me-text);
+  border-color: transparent;
+  box-shadow: var(--shadow-sm), var(--glass-highlight);
 }
 
 .row.mine .bubble.tail::before {

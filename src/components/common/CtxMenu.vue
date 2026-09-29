@@ -79,7 +79,7 @@ function onPick(item: MenuItem): void {
 <template>
   <div v-if="ui.contextMenu" class="ctx-root">
     <div class="mask" @click="ui.closeContextMenu()" @contextmenu.prevent="ui.closeContextMenu()" />
-    <div class="menu" :style="style">
+    <div class="menu frost" :style="style">
       <button
         v-for="item in items"
         :key="item.key"
@@ -111,6 +111,7 @@ function onPick(item: MenuItem): void {
   padding: 6px;
   border-radius: 12px;
   background: var(--surface-2);
+  border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-lg);
   animation: pop-in 0.16s ease both;
 }

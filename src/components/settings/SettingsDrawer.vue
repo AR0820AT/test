@@ -34,7 +34,7 @@ const current = computed(() => PANELS[ui.tab])
   <div v-if="ui.drawerOpen" class="root">
     <div class="mask" @click="ui.closeDrawer()" />
 
-    <aside class="drawer">
+    <aside class="drawer frost">
       <header class="head">
         <button v-if="ui.tab !== 'menu'" class="icon-btn-sm" aria-label="返回" @click="ui.setTab('menu')">
           <Icon name="back" :size="20" />
@@ -62,7 +62,9 @@ const current = computed(() => PANELS[ui.tab])
 .mask {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   animation: fade-in 0.2s ease both;
 }
 
@@ -74,8 +76,8 @@ const current = computed(() => PANELS[ui.tab])
   width: min(92vw, 420px);
   display: flex;
   flex-direction: column;
-  background: var(--bg);
-  border-left: 1px solid var(--border);
+  background: var(--drawer-bg);
+  border-left: 1px solid var(--glass-border);
   box-shadow: var(--shadow-lg);
   animation: slide-in-right 0.24s ease both;
 }
@@ -88,7 +90,9 @@ const current = computed(() => PANELS[ui.tab])
   height: calc(var(--nav-height) + var(--safe-top));
   padding: var(--safe-top) 8px 0;
   background: var(--nav-bg);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
 }
 
 h2 {

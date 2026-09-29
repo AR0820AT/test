@@ -34,7 +34,8 @@ const ui = useUiStore()
   color: #fff;
   font-size: 13px;
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
 }
 
 .toast-enter-active,

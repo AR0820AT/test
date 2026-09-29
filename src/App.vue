@@ -40,10 +40,21 @@ watchEffect(() => {
 watchEffect(() => {
   document.documentElement.dataset.anim = settings.ui.animations ? 'on' : 'off'
 })
+
+watchEffect(() => {
+  document.documentElement.dataset.glass = settings.ui.glass ? 'on' : 'off'
+})
 </script>
 
 <template>
   <div class="app">
+    <!-- 背景光斑：毛玻璃需要有东西可以模糊 -->
+    <div class="aurora" aria-hidden="true">
+      <span class="blob blob-a" />
+      <span class="blob blob-b" />
+      <span class="blob blob-c" />
+    </div>
+
     <template v-if="lock.unlocked">
       <NavBar />
       <ChatView />
@@ -67,6 +78,76 @@ watchEffect(() => {
   flex-direction: column;
   background: var(--bg);
   overflow: hidden;
+}
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.55;
+}
+
+.blob-a {
+  top: -14vh;
+  left: -12vw;
+  width: 62vw;
+  height: 62vw;
+  background: var(--accent);
+  animation: drift-a 22s ease-in-out infinite alternate;
+}
+
+.blob-b {
+  bottom: -18vh;
+  right: -14vw;
+  width: 58vw;
+  height: 58vw;
+  background: #7c5cff;
+  opacity: 0.42;
+  animation: drift-b 26s ease-in-out infinite alternate;
+}
+
+.blob-c {
+  top: 32vh;
+  right: -20vw;
+  width: 46vw;
+  height: 46vw;
+  background: #23b3d8;
+  opacity: 0.35;
+  animation: drift-a 30s ease-in-out infinite alternate-reverse;
+}
+
+html[data-theme='dark'] .blob {
+  opacity: 0.34;
+}
+
+html[data-glass='off'] .aurora {
+  display: none;
+}
+
+@keyframes drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(8vw, 6vh, 0) scale(1.12);
+  }
+}
+
+@keyframes drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-7vw, -5vh, 0) scale(1);
+  }
 }
 
 .lock-enter-active,

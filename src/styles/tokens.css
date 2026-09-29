@@ -11,20 +11,24 @@
   --accent-soft: rgba(7, 193, 96, 0.12);
   --accent-contrast: #ffffff;
 
-  --bg: #ededed;
-  --nav-bg: #ededed;
-  --surface: #f7f7f7;
-  --surface-2: #ffffff;
-  --input-bg: #ffffff;
+  --bg: #eef0f5;
+  --nav-bg: rgba(255, 255, 255, 0.62);
+  --drawer-bg: rgba(240, 242, 247, 0.72);
+  --surface: rgba(255, 255, 255, 0.48);
+  --surface-2: rgba(255, 255, 255, 0.66);
+  --input-bg: rgba(255, 255, 255, 0.62);
 
   --text: #16161a;
-  --text-2: #8c8c92;
-  --text-3: #b5b5bb;
+  --text-2: #76767e;
+  --text-3: #a2a2ab;
 
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.14);
+  --border: rgba(16, 18, 27, 0.08);
+  --border-strong: rgba(16, 18, 27, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-blur: 18px;
+  --glass-sat: 165%;
 
-  --bubble-them: #ffffff;
+  --bubble-them: rgba(255, 255, 255, 0.66);
   --bubble-them-text: #16161a;
   --bubble-me: var(--accent);
   --bubble-me-text: var(--accent-contrast);
@@ -34,6 +38,7 @@
   --shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.06);
   --shadow-md: 0 10px 30px rgba(16, 16, 20, 0.12);
   --shadow-lg: 0 18px 40px rgba(16, 16, 20, 0.18);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 
   --radius-sm: 10px;
   --radius: 14px;
@@ -51,25 +56,56 @@
 html[data-theme='dark'] {
   color-scheme: dark;
 
-  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-soft: rgba(255, 255, 255, 0.1);
 
-  --bg: #101113;
-  --nav-bg: #17181b;
-  --surface: #1a1b1f;
-  --surface-2: #22242a;
-  --input-bg: #1f2126;
+  --bg: #0e1014;
+  --nav-bg: rgba(22, 24, 29, 0.58);
+  --drawer-bg: rgba(16, 18, 22, 0.72);
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-2: rgba(255, 255, 255, 0.08);
+  --input-bg: rgba(255, 255, 255, 0.07);
 
   --text: #ecedf0;
   --text-2: #9a9ba3;
   --text-3: #6f7178;
 
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.09);
   --border-strong: rgba(255, 255, 255, 0.16);
+  --glass-border: rgba(255, 255, 255, 0.12);
 
-  --bubble-them: #23252b;
+  --bubble-them: rgba(255, 255, 255, 0.1);
   --bubble-them-text: #ecedf0;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.6);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* 关闭毛玻璃：模糊归零 + 表面换成实色，低配机也能流畅 */
+html[data-glass='off'] {
+  --glass-blur: 0px;
+  --glass-sat: 100%;
+  --nav-bg: #f4f5f8;
+  --drawer-bg: #f4f5f8;
+  --surface: #f2f3f7;
+  --surface-2: #ffffff;
+  --input-bg: #ffffff;
+  --bubble-them: #ffffff;
+  --border: rgba(16, 18, 27, 0.08);
+  --border-strong: rgba(16, 18, 27, 0.14);
+  --glass-border: rgba(16, 18, 27, 0.08);
+  --glass-highlight: none;
+}
+
+html[data-theme='dark'][data-glass='off'] {
+  --nav-bg: #17181b;
+  --drawer-bg: #17181b;
+  --surface: #1a1b1f;
+  --surface-2: #22242a;
+  --input-bg: #1f2126;
+  --bubble-them: #23252b;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }

@@ -29,7 +29,7 @@ function togglePause(): void {
 </script>
 
 <template>
-  <header class="nav">
+  <header class="nav frost">
     <button class="icon-btn" aria-label="打开设置" @click="ui.openDrawer('menu')">
       <Icon name="menu" />
     </button>
@@ -57,7 +57,7 @@ function togglePause(): void {
   align-items: center;
   gap: 2px;
   background: var(--nav-bg);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
   z-index: 20;
 }
 

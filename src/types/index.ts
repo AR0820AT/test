@@ -12,6 +12,25 @@ export type MsgKind = 'text' | 'sticker' | 'image'
 /** 抽卡策略 */
 export type DrawStrategy = 'random' | 'sequential' | 'shuffle'
 
+/** 字卡语言 */
+export type LangCode = 'zh' | 'en'
+
+/** 字卡类别：单词 / 句子 */
+export type CardCategory = 'word' | 'sentence'
+
+/** 英文词性（拼句时用来选模板，不展示给用户） */
+export type WordPos = 'noun' | 'verb' | 'adj' | 'adv' | 'pron' | 'det' | 'prep' | 'conj' | 'aux' | 'num'
+
+/** 自动分组信息：语言 / 类别 / 首字母 */
+export interface CardMeta {
+  lang: LangCode
+  cat: CardCategory
+  letter: string
+}
+
+/** 单词卡的输出方式 */
+export type WordMode = 'sentence' | 'word'
+
 /** 主题模式 */
 export type ThemeMode = 'light' | 'dark' | 'auto'
 
@@ -49,7 +68,7 @@ export interface CardItem {
   lines: string[]
 }
 
-/** 字卡分组 */
+/** 字卡分组：支持「语言 → 词语/句子 → 首字母」三层结构 */
 export interface CardGroup {
   id: string
   name: string
@@ -57,6 +76,10 @@ export interface CardGroup {
   /** 抽组权重，越大越容易被抽到 */
   weight: number
   cards: CardItem[]
+  /** 父分组 id：为空表示顶层（语言）分组 */
+  parentId?: string | null
+  /** 自动分组时写入的分类信息，父级分组不带 */
+  meta?: CardMeta
 }
 
 export interface Sticker {
@@ -87,6 +110,12 @@ export interface ProactiveSettings {
 
 export interface DrawSettings {
   strategy: DrawStrategy
+  /** 拼卡成句：一次抽多张卡拼成一句话发出 */
+  combo: boolean
+  /** 触发拼卡成句的概率（0-100） */
+  comboChance: number
+  /** 抽到单词卡时：sentence＝套进句子里说，word＝原样发单词 */
+  wordMode: WordMode
 }
 
 export interface UiSettings {
@@ -95,6 +124,8 @@ export interface UiSettings {
   accent: string
   animations: boolean
   bubbleTail: boolean
+  /** 毛玻璃（背景模糊）效果，关闭后可提升低端机性能 */
+  glass: boolean
 }
 
 export interface Settings {

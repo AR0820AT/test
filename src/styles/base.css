@@ -8,6 +8,8 @@ body,
 #app {
   height: 100%;
   margin: 0;
+  /* 禁止 iOS 横竖屏切换时自动放大字号 */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -18,6 +20,14 @@ body {
   line-height: 1.5;
   overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
+  /* 禁止双击缩放，同时不影响滚动 */
+  touch-action: manipulation;
+}
+
+/* 毛玻璃：背景模糊 + 提亮，关掉毛玻璃时自动失效 */
+.frost {
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
 }
 
 button {
@@ -130,9 +140,12 @@ html[data-anim='off'] *::after {
 
 .section {
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   overflow: hidden;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  box-shadow: var(--glass-highlight);
 }
 
 .sec-title {
@@ -150,8 +163,10 @@ html[data-anim='off'] *::after {
   padding: 8px 14px;
   border-radius: 10px;
   background: var(--surface);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--glass-border);
   font-size: 14px;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   transition: transform 0.14s ease, background 0.16s ease;
 }
 
@@ -179,9 +194,11 @@ html[data-anim='off'] *::after {
   width: 100%;
   padding: 9px 10px;
   border-radius: 10px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--glass-border);
   background: var(--input-bg);
   font-size: 15px;
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
 }
 
 .input:focus,

@@ -1,0 +1,609 @@
+import type { WordPos } from '@/types'
+
+export type WordEntry = { word: string; pos: WordPos }
+
+/**
+ * 英文高频词 500 个：单词|词性
+ * 词性只用于「拼卡成句」时挑选模板，不会展示给用户
+ * pos：noun 名词 / verb 动词 / adj 形容词 / adv 副词 / pron 代词 / det 限定词
+ *      prep 介词 / conj 连词 / aux 情态或助动词 / num 数词
+ */
+const RAW = `
+the|det
+be|verb
+to|prep
+of|prep
+and|conj
+a|det
+in|prep
+that|det
+have|verb
+I|pron
+it|pron
+for|prep
+not|adv
+on|prep
+with|prep
+he|pron
+as|conj
+you|pron
+do|verb
+at|prep
+this|det
+but|conj
+his|det
+by|prep
+from|prep
+they|pron
+we|pron
+say|verb
+her|det
+she|pron
+or|conj
+an|det
+will|aux
+my|det
+one|num
+all|det
+would|aux
+there|adv
+their|det
+what|pron
+so|adv
+up|adv
+out|adv
+if|conj
+about|prep
+who|pron
+get|verb
+which|pron
+go|verb
+me|pron
+when|adv
+make|verb
+can|aux
+like|verb
+time|noun
+no|det
+just|adv
+him|pron
+know|verb
+take|verb
+people|noun
+into|prep
+year|noun
+your|det
+good|adj
+some|det
+could|aux
+them|pron
+see|verb
+other|adj
+than|conj
+then|adv
+now|adv
+look|verb
+only|adv
+come|verb
+its|det
+over|prep
+think|verb
+also|adv
+back|adv
+after|prep
+use|verb
+two|num
+how|adv
+our|det
+work|verb
+first|adj
+well|adv
+way|noun
+even|adv
+new|adj
+want|verb
+because|conj
+any|det
+these|det
+give|verb
+day|noun
+most|adv
+us|pron
+very|adv
+never|adv
+always|adv
+often|adv
+here|adv
+man|noun
+find|verb
+thing|noun
+tell|verb
+try|verb
+ask|verb
+need|verb
+feel|verb
+become|verb
+leave|verb
+put|verb
+mean|verb
+keep|verb
+let|verb
+begin|verb
+seem|verb
+help|verb
+talk|verb
+turn|verb
+start|verb
+might|aux
+show|verb
+hear|verb
+play|verb
+run|verb
+move|verb
+live|verb
+believe|verb
+hold|verb
+bring|verb
+happen|verb
+write|verb
+sit|verb
+stand|verb
+lose|verb
+pay|verb
+meet|verb
+include|verb
+continue|verb
+set|verb
+learn|verb
+change|verb
+lead|verb
+understand|verb
+watch|verb
+follow|verb
+stop|verb
+create|verb
+speak|verb
+read|verb
+allow|verb
+add|verb
+spend|verb
+grow|verb
+open|verb
+walk|verb
+win|verb
+offer|verb
+remember|verb
+love|verb
+consider|verb
+appear|verb
+buy|verb
+wait|verb
+serve|verb
+die|verb
+send|verb
+expect|verb
+build|verb
+stay|verb
+fall|verb
+cut|verb
+reach|verb
+kill|verb
+remain|verb
+suggest|verb
+raise|verb
+pass|verb
+sell|verb
+require|verb
+report|verb
+decide|verb
+pull|verb
+return|verb
+explain|verb
+hope|verb
+develop|verb
+carry|verb
+break|verb
+receive|verb
+agree|verb
+support|verb
+hit|verb
+produce|verb
+eat|verb
+cover|verb
+catch|verb
+choose|verb
+world|noun
+life|noun
+hand|noun
+part|noun
+eye|noun
+place|noun
+week|noun
+case|noun
+point|noun
+company|noun
+number|noun
+group|noun
+problem|noun
+fact|noun
+home|noun
+water|noun
+room|noun
+mother|noun
+area|noun
+money|noun
+story|noun
+month|noun
+right|noun
+study|noun
+book|noun
+job|noun
+word|noun
+business|noun
+issue|noun
+side|noun
+kind|noun
+head|noun
+house|noun
+service|noun
+friend|noun
+father|noun
+power|noun
+hour|noun
+game|noun
+line|noun
+end|noun
+member|noun
+law|noun
+car|noun
+city|noun
+name|noun
+team|noun
+minute|noun
+idea|noun
+body|noun
+information|noun
+parent|noun
+face|noun
+level|noun
+office|noun
+door|noun
+health|noun
+person|noun
+art|noun
+war|noun
+history|noun
+party|noun
+result|noun
+morning|noun
+reason|noun
+girl|noun
+moment|noun
+air|noun
+teacher|noun
+force|noun
+food|noun
+market|noun
+price|noun
+music|noun
+night|noun
+age|noun
+school|noun
+system|noun
+program|noun
+question|noun
+government|noun
+child|noun
+woman|noun
+family|noun
+student|noun
+society|noun
+country|noun
+community|noun
+state|noun
+paper|noun
+space|noun
+ground|noun
+form|noun
+matter|noun
+center|noun
+couple|noun
+activity|noun
+industry|noun
+media|noun
+phone|noun
+picture|noun
+great|adj
+big|adj
+old|adj
+different|adj
+small|adj
+large|adj
+young|adj
+important|adj
+few|adj
+public|adj
+bad|adj
+same|adj
+able|adj
+human|adj
+local|adj
+late|adj
+hard|adj
+major|adj
+better|adj
+strong|adj
+possible|adj
+whole|adj
+free|adj
+true|adj
+full|adj
+special|adj
+easy|adj
+clear|adj
+recent|adj
+certain|adj
+personal|adj
+ready|adj
+real|adj
+beautiful|adj
+sorry|adj
+wrong|adj
+dead|adj
+fine|adj
+heavy|adj
+hot|adj
+poor|adj
+safe|adj
+sure|adj
+tired|adj
+warm|adj
+cold|adj
+dark|adj
+deep|adj
+fast|adj
+high|adj
+long|adj
+low|adj
+quiet|adj
+rich|adj
+slow|adj
+soft|adj
+wide|adj
+happy|adj
+sad|adj
+angry|adj
+busy|adj
+clean|adj
+close|adj
+common|adj
+complete|adj
+correct|adj
+crazy|adj
+difficult|adj
+early|adj
+empty|adj
+expensive|adj
+famous|adj
+favorite|adj
+final|adj
+foreign|adj
+fresh|adj
+funny|adj
+general|adj
+glad|adj
+huge|adj
+ill|adj
+little|adj
+lucky|adj
+mad|adj
+main|adj
+modern|adj
+nervous|adj
+nice|adj
+normal|adj
+past|adj
+perfect|adj
+pleasant|adj
+polite|adj
+popular|adj
+proud|adj
+quick|adj
+rare|adj
+again|adv
+away|adv
+down|adv
+far|adv
+forward|adv
+instead|adv
+later|adv
+less|adv
+maybe|adv
+near|adv
+quite|adv
+really|adv
+soon|adv
+still|adv
+today|adv
+tomorrow|adv
+tonight|adv
+together|adv
+yesterday|adv
+yet|adv
+where|adv
+why|adv
+once|adv
+perhaps|adv
+almost|adv
+already|adv
+enough|adv
+especially|adv
+finally|adv
+hardly|adv
+immediately|adv
+nearly|adv
+probably|adv
+slowly|adv
+suddenly|adv
+usually|adv
+between|prep
+through|prep
+during|prep
+before|prep
+above|prep
+since|prep
+without|prep
+within|prep
+along|prep
+across|prep
+behind|prep
+beyond|prep
+around|prep
+against|prep
+among|prep
+until|conj
+unless|conj
+whether|conj
+although|conj
+though|conj
+while|conj
+shall|aux
+should|aux
+may|aux
+must|aux
+three|num
+four|num
+five|num
+six|num
+seven|num
+eight|num
+nine|num
+ten|num
+hundred|num
+thousand|num
+million|num
+second|num
+third|num
+half|num
+many|num
+much|num
+more|num
+several|num
+both|num
+least|num
+mine|pron
+yours|pron
+whose|pron
+someone|pron
+everyone|pron
+something|pron
+anything|pron
+nothing|pron
+myself|pron
+each|det
+every|det
+those|det
+another|det
+such|det
+last|adj
+next|adj
+own|adj
+usual|adj
+`
+
+/** 500 个高频词，按常用度排序 */
+export const TOP_WORDS: WordEntry[] = RAW.trim()
+  .split('\n')
+  .map((line) => line.trim())
+  .filter(Boolean)
+  .map((line) => {
+    const [word, pos] = line.split('|')
+    return { word, pos: (pos || 'noun') as WordPos }
+  })
+
+/** 单词 → 词性，拼句时查表 */
+export const WORD_POS: Record<string, WordPos> = Object.fromEntries(
+  TOP_WORDS.map((item) => [item.word.toLowerCase(), item.pos]),
+)
+
+/** 常用英文口语句子，作为「英文 / 句子」字卡 */
+export const EN_SENTENCES: string[] = [
+  'What are you up to?',
+  'Just thinking about you.',
+  'Did you eat yet?',
+  "Long day, but I'm okay.",
+  "I'll be right here.",
+  'Tell me about your day.',
+  'That sounds nice.',
+  'Take your time.',
+  'I miss you a little.',
+  'Guess what happened today.',
+  'You always make me laugh.',
+  'Let us talk later tonight.',
+  'I just got home.',
+  "No rush, I'll wait.",
+  "It's been a long week.",
+  'Thanks for being here.',
+  "I can't stop smiling.",
+  'Good night, sleep well.',
+  'Morning, did you sleep well?',
+  "I'm still awake, honestly.",
+  'Send me a picture?',
+  "Everything's fine on my side.",
+  'Coffee first, then talk.',
+  'You were right, by the way.',
+  "I'd rather stay in today.",
+  'Nothing much, just resting.',
+  'Call me when you are free.',
+  'That made my day.',
+  'Same here, honestly.',
+  'See you soon, okay?',
+]
+
+/** 中文词语，作为「中文 / 词语」字卡 */
+export const ZH_WORDS: string[] = [
+  '你好',
+  '谢谢',
+  '晚安',
+  '早安',
+  '想你',
+  '加油',
+  '好的',
+  '没事',
+  '真的',
+  '现在',
+  '今天',
+  '明天',
+  '时间',
+  '朋友',
+  '家里',
+  '工作',
+  '吃饭',
+  '睡觉',
+  '开心',
+  '累了',
+]
+
+/** 中文句子，作为「中文 / 句子」字卡 */
+export const ZH_SENTENCES: string[] = [
+  '在干嘛呀？',
+  '今天过得怎么样？',
+  '记得早点休息。',
+  '我刚刚到家。',
+  '晚饭吃了吗？',
+  '慢慢来，不着急。',
+  '有点想你了。',
+  '那就这么说定了。',
+  '我在等你消息。',
+  '今天好累啊。',
+  '别熬太晚了。',
+  '你先忙，我不打扰。',
+  '记得喝水。',
+  '路上注意安全。',
+  '我等你回来。',
+  '一切都挺好的。',
+  '有空就回我一下。',
+  '想跟你聊会儿天。',
+  '天气不错，出去走走吧。',
+  '早点睡，明天见。',
+]

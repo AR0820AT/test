@@ -28,6 +28,11 @@ const bubbleTail = computed({
   get: () => settings.ui.bubbleTail,
   set: (value: boolean) => settings.updateUi({ bubbleTail: value }),
 })
+
+const glass = computed({
+  get: () => settings.ui.glass,
+  set: (value: boolean) => settings.updateUi({ glass: value }),
+})
 </script>
 
 <template>
@@ -41,6 +46,9 @@ const bubbleTail = computed({
       </Row>
       <Row label="气泡小尖角">
         <Switch v-model="bubbleTail" />
+      </Row>
+      <Row label="毛玻璃" hint="面板与气泡带背景模糊，卡顿时可关掉">
+        <Switch v-model="glass" />
       </Row>
     </section>
 

@@ -6,7 +6,7 @@ import Segmented from '@/components/ui/Segmented.vue'
 import Switch from '@/components/ui/Switch.vue'
 import { brain } from '@/engine/brain'
 import { useSettingsStore } from '@/stores/useSettingsStore'
-import type { DrawStrategy } from '@/types'
+import type { DrawStrategy, WordMode } from '@/types'
 
 const settings = useSettingsStore()
 
@@ -16,12 +16,28 @@ const strategies: { label: string; value: DrawStrategy }[] = [
   { label: '不重复', value: 'shuffle' },
 ]
 
+const wordModes: { label: string; value: WordMode }[] = [
+  { label: '套进句子', value: 'sentence' },
+  { label: '只发单词', value: 'word' },
+]
+
 const strategy = computed({
   get: () => settings.draw.strategy,
   set: (value: DrawStrategy) => {
     settings.settings.draw = { ...settings.settings.draw, strategy: value }
   },
 })
+
+const wordMode = computed({
+  get: () => settings.draw.wordMode,
+  set: (value: WordMode) => {
+    settings.settings.draw = { ...settings.settings.draw, wordMode: value }
+  },
+})
+
+function patchDraw(patch: Partial<typeof settings.settings.draw>): void {
+  settings.settings.draw = { ...settings.settings.draw, ...patch }
+}
 
 // 主动消息的间隔改了要立刻重排下一次时间
 watch(
@@ -73,6 +89,22 @@ watch(
       <div class="sec-title">抽卡方式</div>
       <Row label="策略" hint="不重复＝一轮里每张都会出现一次">
         <Segmented v-model="strategy" :options="strategies" />
+      </Row>
+      <Row label="单词卡输出" hint="抽到单个英文单词时怎么说出来">
+        <Segmented v-model="wordMode" :options="wordModes" />
+      </Row>
+      <Row label="拼卡成句" hint="随机抽三张卡，拼成一句话发出来">
+        <Switch :model-value="settings.draw.combo" @update:model-value="patchDraw({ combo: $event })" />
+      </Row>
+      <Row label="拼句概率" hint="越高越常出现拼出来的长句">
+        <NumberField
+          :model-value="settings.draw.comboChance"
+          :min="0"
+          :max="100"
+          :step="5"
+          suffix="%"
+          @update:model-value="patchDraw({ comboChance: $event })"
+        />
       </Row>
     </section>
 

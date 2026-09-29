@@ -35,12 +35,16 @@ export function defaultSettings(): Settings {
     },
     draw: {
       strategy: 'shuffle',
+      combo: true,
+      comboChance: 45,
+      wordMode: 'sentence',
     },
     ui: {
       theme: 'auto',
       accent: ACCENTS[0].value,
       animations: true,
       bubbleTail: true,
+      glass: true,
     },
   }
 }

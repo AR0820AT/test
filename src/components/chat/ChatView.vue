@@ -228,11 +228,13 @@ onMounted(() => {
 
 <style scoped>
 .chat {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  background: transparent;
 }
 
 .scroller {
@@ -294,8 +296,10 @@ onMounted(() => {
 .composer {
   flex: none;
   background: var(--nav-bg);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--glass-border);
   padding-bottom: var(--safe-bottom);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
 }
 
 .quote-bar {
@@ -306,9 +310,11 @@ onMounted(() => {
   padding: 7px 10px;
   border-radius: 10px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   font-size: 12px;
   color: var(--text-2);
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
 }
 
 .quote-bar .name {
@@ -355,8 +361,10 @@ onMounted(() => {
   max-height: 108px;
   padding: 8px 12px;
   border-radius: 12px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--glass-border);
   background: var(--input-bg);
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   resize: none;
   overflow-y: auto;
   line-height: 1.4;
