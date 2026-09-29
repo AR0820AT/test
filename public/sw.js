@@ -2,7 +2,7 @@
  * 极简 Service Worker：缓存应用外壳，实现离线打开与「添加到主屏幕」
  * 只做 GET 请求，数据本身存在 localStorage / IndexedDB，不受影响
  */
-const CACHE = 'card-chat-v1'
+const CACHE = 'card-chat-v2'
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png']
 
 self.addEventListener('install', (event) => {
@@ -45,17 +45,16 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // 静态资源：缓存优先，没有就取网络并写入缓存
+  // 静态资源：网络优先（保证改版后立刻生效），断网或失败时回落缓存
   event.respondWith(
-    caches.match(request).then((hit) => {
-      if (hit) return hit
-      return fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         if (response.ok && response.type === 'basic') {
           const copy = response.clone()
           caches.open(CACHE).then((cache) => cache.put(request, copy))
         }
         return response
       })
-    }),
+      .catch(() => caches.match(request).then((hit) => hit || caches.match('./index.html'))),
   )
 })
