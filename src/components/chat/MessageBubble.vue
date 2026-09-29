@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { computed, type Ref } from 'vue'
 import type { Message } from '@/types'
-import Avatar from '@/components/common/Avatar.vue'
 import { useAssetUrl } from '@/composables/useAssetUrl'
-import { useSettingsStore } from '@/stores/useSettingsStore'
+import { useProfileStore } from '@/stores/useProfileStore'
 import { useUiStore } from '@/stores/useUiStore'
 
 const props = defineProps<{ message: Message }>()
 
-const settings = useSettingsStore()
 const ui = useUiStore()
+const profile = useProfileStore()
 
 const mine = computed(() => props.message.role === 'me')
+/** 气泡上方显示昵称，用来区分双方 */
+const who = computed(() => profile.nameOf(props.message.role))
 const assetId = computed(() => props.message.assetId ?? '')
 const url = useAssetUrl(assetId as Ref<string | null | undefined>)
 const quote = computed(() => props.message.quote ?? null)
-const withTail = computed(() => settings.ui.bubbleTail)
 
 /** 长按 450ms 弹出菜单（桌面端右键同效） */
 let pressTimer: ReturnType<typeof setTimeout> | undefined
@@ -50,10 +50,10 @@ function onContextMenu(event: MouseEvent): void {
 
 <template>
   <div class="row" :class="{ mine }">
-    <Avatar :role="message.role" :size="40" />
-
     <div class="stack">
-      <div class="bubble" :class="{ tail: withTail }" @touchstart.passive="startPress" @touchend="cancelPress" @touchmove="moved = true; cancelPress()" @touchcancel="cancelPress" @mousedown="startPress" @mouseup="cancelPress" @mouseleave="cancelPress" @contextmenu="onContextMenu">
+      <div class="who">{{ who }}</div>
+
+      <div class="bubble" @touchstart.passive="startPress" @touchend="cancelPress" @touchmove="moved = true; cancelPress()" @touchcancel="cancelPress" @mousedown="startPress" @mouseup="cancelPress" @mouseleave="cancelPress" @contextmenu="onContextMenu">
         <div v-if="quote" class="quote">
           <span class="quote-name">{{ quote.name }}：</span>
           <span class="quote-text">{{ quote.digest }}</span>
@@ -77,7 +77,6 @@ function onContextMenu(event: MouseEvent): void {
 <style scoped>
 .row {
   display: flex;
-  gap: 8px;
   align-items: flex-start;
   padding: 3px 12px;
   animation: pop-in 0.22s ease both;
@@ -88,10 +87,22 @@ function onContextMenu(event: MouseEvent): void {
 }
 
 .stack {
-  max-width: calc(100% - 60px);
+  max-width: 82%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+.row.mine .stack {
+  align-items: flex-end;
+}
+
+.who {
+  margin: 0 4px 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.04em;
+  color: var(--text-3);
 }
 
 .row.mine .stack {
@@ -113,33 +124,11 @@ function onContextMenu(event: MouseEvent): void {
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.7)) saturate(var(--glass-sat));
 }
 
-.bubble.tail::before {
-  content: '';
-  position: absolute;
-  top: 12px;
-  left: -5px;
-  width: 10px;
-  height: 10px;
-  background: inherit;
-  transform: rotate(45deg);
-  border-radius: 2px;
-}
-
-.row.mine .bubble {
-  background: var(--bubble-me);
-  color: var(--bubble-me-text);
-  border-color: transparent;
-  box-shadow: var(--shadow-sm), var(--glass-highlight);
-}
-
-.row.mine .bubble.tail::before {
-  left: auto;
-  right: -5px;
-}
+/* 两侧气泡完全一样的样式，只靠左右对齐和昵称区分 */
 
 .text {
-  font-size: 16px;
-  line-height: 1.45;
+  font-size: var(--fs-base);
+  line-height: 1.5;
 }
 
 .muted {
@@ -166,16 +155,11 @@ function onContextMenu(event: MouseEvent): void {
   padding: 6px 8px;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.06);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   line-height: 1.35;
   color: inherit;
   opacity: 0.85;
   border-left: 3px solid rgba(0, 0, 0, 0.18);
-}
-
-.row.mine .quote {
-  background: rgba(255, 255, 255, 0.16);
-  border-left-color: rgba(255, 255, 255, 0.4);
 }
 
 .quote-name {

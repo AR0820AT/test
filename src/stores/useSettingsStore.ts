@@ -1,12 +1,19 @@
 import { computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { Settings } from '@/types'
+import type { FontScale, Settings } from '@/types'
 import { usePersisted, withDefaults } from '@/storage/persist'
 
 export interface AccentOption {
   name: string
   value: string
 }
+
+/** 字号档位 → 正文基准字号（px） */
+export const FONT_SCALES: { label: string; value: FontScale; px: number }[] = [
+  { label: '小', value: 'sm', px: 13 },
+  { label: '标准', value: 'md', px: 15 },
+  { label: '大', value: 'lg', px: 17 },
+]
 
 /** 可选强调色：切换即可整体换肤 */
 export const ACCENTS: AccentOption[] = [
@@ -20,13 +27,15 @@ export const ACCENTS: AccentOption[] = [
 
 export function defaultSettings(): Settings {
   return {
-    paused: false,
     reply: {
       enabled: true,
       minDelaySec: 2,
       maxDelaySec: 8,
-      lineGapSec: 1.2,
-      typingSec: 1.5,
+      ignoreChance: 20,
+      lineGapMinSec: 0.8,
+      lineGapMaxSec: 2.6,
+      typingMinSec: 1.1,
+      typingMaxSec: 3.2,
     },
     proactive: {
       enabled: true,
@@ -34,17 +43,14 @@ export function defaultSettings(): Settings {
       maxIntervalMin: 60,
     },
     draw: {
-      strategy: 'shuffle',
       combo: true,
-      comboChance: 45,
-      wordMode: 'sentence',
     },
     ui: {
       theme: 'auto',
       accent: ACCENTS[0].value,
       animations: true,
-      bubbleTail: true,
       glass: true,
+      fontScale: 'md',
     },
   }
 }
@@ -57,6 +63,10 @@ export const useSettingsStore = defineStore('settings', () => {
     settings.value as unknown as Record<string, unknown>,
     defaultSettings() as unknown as Record<string, unknown>,
   ) as unknown as Settings
+
+  // 旧版本存过「暂停」和「气泡小尖角」，现在都去掉了：清掉，避免出现在备份文件里
+  delete (settings.value as Settings & { paused?: boolean }).paused
+  delete (settings.value.ui as Settings['ui'] & { bubbleTail?: boolean }).bubbleTail
 
   // 主题换成暗红黑后，旧配色（已不在色板里）自动回落到默认色
   if (!ACCENTS.some((item) => item.value === settings.value.ui.accent)) {

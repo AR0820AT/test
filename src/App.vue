@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { watchEffect } from 'vue'
 import { brain } from '@/engine/brain'
-import { useSettingsStore } from '@/stores/useSettingsStore'
+import { FONT_SCALES, useSettingsStore } from '@/stores/useSettingsStore'
 import { useLockStore } from '@/stores/useLockStore'
 import { useTheme } from '@/composables/useTheme'
 import NavBar from '@/components/layout/NavBar.vue'
@@ -43,6 +43,12 @@ watchEffect(() => {
 
 watchEffect(() => {
   document.documentElement.dataset.glass = settings.ui.glass ? 'on' : 'off'
+})
+
+// 字号档位 → 正文基准字号，其余字号都由它派生
+watchEffect(() => {
+  const scale = FONT_SCALES.find((item) => item.value === settings.ui.fontScale) ?? FONT_SCALES[1]
+  document.documentElement.style.setProperty('--fs-base', `${scale.px}px`)
 })
 </script>
 

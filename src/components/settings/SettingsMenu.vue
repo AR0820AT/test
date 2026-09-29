@@ -28,12 +28,12 @@ interface Entry {
 }
 
 const entries = computed<Entry[]>(() => [
-  { key: 'profile', icon: 'user', title: '人物资料', desc: '两边的昵称与头像' },
+  { key: 'profile', icon: 'user', title: '人物资料', desc: '两边的昵称' },
   { key: 'cards', icon: 'cards', title: '字卡库', desc: `${cardStore.totalCards} 张字卡，可分组与加权` },
   { key: 'stickers', icon: 'smile', title: '表情包', desc: `${stickerStore.stickers.length} 个自定义表情` },
   { key: 'reply', icon: 'sliders', title: '对话节奏', desc: '回复延迟、主动发言、抽卡方式' },
   { key: 'appearance', icon: 'moon', title: '外观', desc: '主题、强调色、气泡样式' },
-  { key: 'data', icon: 'database', title: '数据管理', desc: `${chat.messages.length} 条消息，备份与恢复` },
+  { key: 'data', icon: 'database', title: '数据管理', desc: `${chat.messages.length} 条消息，占用与清理` },
 ])
 </script>
 
@@ -50,12 +50,10 @@ const entries = computed<Entry[]>(() => [
       </button>
     </section>
 
-    <button class="btn primary block" @click="brain.drawNow()">让对方立刻抽一张字卡</button>
+    <button class="btn primary block" @click="brain.drawNow()">戳戳对方</button>
     <button class="btn block" @click="lockScreen()">立即锁定屏幕</button>
 
-    <p class="muted">
-      所有数据只保存在这台设备的浏览器里，不会上传。清理浏览器数据前记得先去「数据管理」导出备份。
-    </p>
+    <p class="muted">所有数据只保存在这台设备的浏览器里，不会上传。</p>
   </div>
 </template>
 
@@ -97,11 +95,11 @@ const entries = computed<Entry[]>(() => [
 }
 
 .name {
-  font-size: 15px;
+  font-size: var(--fs-base);
 }
 
 .desc {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
   margin-top: 1px;
 }

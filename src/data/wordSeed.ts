@@ -521,11 +521,6 @@ export const TOP_WORDS: WordEntry[] = RAW.trim()
     return { word, pos: (pos || 'noun') as WordPos }
   })
 
-/** 单词 → 词性，拼句时查表 */
-export const WORD_POS: Record<string, WordPos> = Object.fromEntries(
-  TOP_WORDS.map((item) => [item.word.toLowerCase(), item.pos]),
-)
-
 /** 常用英文口语句子，作为「英文 / 句子」字卡 */
 export const EN_SENTENCES: string[] = [
   'What are you up to?',

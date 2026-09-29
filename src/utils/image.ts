@@ -70,21 +70,3 @@ export async function compressImage(file: File, maxSize = 512, quality = 0.85): 
 
   return canvasToBlob(canvas, quality)
 }
-
-export function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(new Error('读取失败'))
-    reader.readAsDataURL(blob)
-  })
-}
-
-export function dataUrlToBlob(dataUrl: string): Blob {
-  const [meta, base64] = dataUrl.split(',')
-  const mime = /:(.*?);/.exec(meta)?.[1] ?? 'image/png'
-  const binary = atob(base64)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i)
-  return new Blob([bytes], { type: mime })
-}

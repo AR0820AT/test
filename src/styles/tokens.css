@@ -28,10 +28,9 @@
   --glass-blur: 18px;
   --glass-sat: 150%;
 
+  /* 双方气泡样式完全一致 */
   --bubble-them: rgba(255, 255, 255, 0.08);
   --bubble-them-text: #f2e7e8;
-  --bubble-me: var(--accent);
-  --bubble-me-text: var(--accent-contrast);
 
   --danger: #ff5f5f;
 
@@ -45,12 +44,24 @@
   --radius-lg: 20px;
   --bubble-radius: 16px;
 
+  /* 字号：--fs-base 由「外观 → 字号」注入，其余都从它派生 */
+  --fs-base: 15px;
+  --fs-sm: calc(var(--fs-base) - 3px);
+  --fs-lg: calc(var(--fs-base) + 2px);
+  --fs-xl: calc(var(--fs-base) + 4px);
+
   --nav-height: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  --font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
-    'Helvetica Neue', system-ui, sans-serif;
+  /* 中文：思源宋体（Noto Serif SC，字重 500）；英文正文：Cormorant Garamond（古典衬线） */
+  --font-zh: 'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', 'Songti SC', 'STSong',
+    'SimSun', 'Noto Serif CJK SC', serif;
+  --font-en: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', 'Georgia', serif;
+  /* 标题 / 名字牌：Pirata One（哥特风 Blackletter），中文自动回落到思源宋体 */
+  --font-display: 'Pirata One', var(--font-zh);
+
+  --font: var(--font-en), var(--font-zh);
 }
 
 html[data-theme='dark'] {

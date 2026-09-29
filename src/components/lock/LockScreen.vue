@@ -128,8 +128,10 @@ function press(key: string): void {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #fff;
-  font-size: 27px;
-  font-weight: 300;
+  /* 数字用宋体字形，避免花体导致认错键 */
+  font-family: var(--font-zh);
+  font-size: 28px;
+  font-weight: 500;
   transition: background 0.14s ease, transform 0.1s ease;
 }
 

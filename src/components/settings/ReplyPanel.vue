@@ -1,39 +1,12 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { watch } from 'vue'
 import NumberField from '@/components/ui/NumberField.vue'
 import Row from '@/components/ui/Row.vue'
-import Segmented from '@/components/ui/Segmented.vue'
 import Switch from '@/components/ui/Switch.vue'
 import { brain } from '@/engine/brain'
 import { useSettingsStore } from '@/stores/useSettingsStore'
-import type { DrawStrategy, WordMode } from '@/types'
 
 const settings = useSettingsStore()
-
-const strategies: { label: string; value: DrawStrategy }[] = [
-  { label: '随机', value: 'random' },
-  { label: '顺序', value: 'sequential' },
-  { label: '不重复', value: 'shuffle' },
-]
-
-const wordModes: { label: string; value: WordMode }[] = [
-  { label: '套进句子', value: 'sentence' },
-  { label: '只发单词', value: 'word' },
-]
-
-const strategy = computed({
-  get: () => settings.draw.strategy,
-  set: (value: DrawStrategy) => {
-    settings.settings.draw = { ...settings.settings.draw, strategy: value }
-  },
-})
-
-const wordMode = computed({
-  get: () => settings.draw.wordMode,
-  set: (value: WordMode) => {
-    settings.settings.draw = { ...settings.settings.draw, wordMode: value }
-  },
-})
 
 function patchDraw(patch: Partial<typeof settings.settings.draw>): void {
   settings.settings.draw = { ...settings.settings.draw, ...patch }
@@ -50,26 +23,27 @@ watch(
 <template>
   <div class="panel">
     <section class="section">
-      <Row label="暂停全部自动化" hint="暂停后对方不回复，也不会主动发消息">
-        <Switch v-model="settings.settings.paused" />
-      </Row>
-    </section>
-
-    <section class="section">
       <div class="sec-title">收到消息后的回复</div>
       <Row label="自动回复">
         <Switch v-model="settings.settings.reply.enabled" />
       </Row>
-      <Row label="回复延迟" hint="发完消息后多久才回">
+      <Row label="已读不回" hint="看到了但就是不回的概率">
+        <NumberField v-model="settings.settings.reply.ignoreChance" :min="0" :max="100" :step="5" suffix="%" />
+      </Row>
+      <Row label="回复延迟" hint="发完消息后隔多久才回，区间内随机">
         <NumberField v-model="settings.settings.reply.minDelaySec" :min="0" :max="120" suffix="秒" />
         <span class="dash">~</span>
         <NumberField v-model="settings.settings.reply.maxDelaySec" :min="0" :max="120" suffix="秒" />
       </Row>
-      <Row label="多连发间隔" hint="一张卡有多行时每行之间的停顿">
-        <NumberField v-model="settings.settings.reply.lineGapSec" :min="0" :max="10" :step="0.2" suffix="秒" />
+      <Row label="「正在输入」" hint="每条消息显示多久，长句子会再久一点">
+        <NumberField v-model="settings.settings.reply.typingMinSec" :min="0" :max="10" :step="0.2" suffix="秒" />
+        <span class="dash">~</span>
+        <NumberField v-model="settings.settings.reply.typingMaxSec" :min="0" :max="10" :step="0.2" suffix="秒" />
       </Row>
-      <Row label="「正在输入」时长">
-        <NumberField v-model="settings.settings.reply.typingSec" :min="0" :max="10" :step="0.5" suffix="秒" />
+      <Row label="多连发间隔" hint="连着说几句时，两句之间的停顿">
+        <NumberField v-model="settings.settings.reply.lineGapMinSec" :min="0" :max="10" :step="0.2" suffix="秒" />
+        <span class="dash">~</span>
+        <NumberField v-model="settings.settings.reply.lineGapMaxSec" :min="0" :max="10" :step="0.2" suffix="秒" />
       </Row>
     </section>
 
@@ -78,7 +52,7 @@ watch(
       <Row label="主动发字卡">
         <Switch v-model="settings.settings.proactive.enabled" />
       </Row>
-      <Row label="间隔" hint="上一句说完后再等这么久">
+      <Row label="间隔" hint="上一句说完后再等这么久，区间内随机">
         <NumberField v-model="settings.settings.proactive.minIntervalMin" :min="1" :max="720" suffix="分" />
         <span class="dash">~</span>
         <NumberField v-model="settings.settings.proactive.maxIntervalMin" :min="1" :max="720" suffix="分" />
@@ -87,25 +61,12 @@ watch(
 
     <section class="section">
       <div class="sec-title">抽卡方式</div>
-      <Row label="策略" hint="不重复＝一轮里每张都会出现一次">
-        <Segmented v-model="strategy" :options="strategies" />
-      </Row>
-      <Row label="单词卡输出" hint="抽到单个英文单词时怎么说出来">
-        <Segmented v-model="wordMode" :options="wordModes" />
-      </Row>
-      <Row label="拼卡成句" hint="随机抽三张卡，拼成一句话发出来">
+      <Row label="拼卡成句" hint="随机抽几张卡、打乱顺序拼在一起，也会把词插进句子中间">
         <Switch :model-value="settings.draw.combo" @update:model-value="patchDraw({ combo: $event })" />
       </Row>
-      <Row label="拼句概率" hint="越高越常出现拼出来的长句">
-        <NumberField
-          :model-value="settings.draw.comboChance"
-          :min="0"
-          :max="100"
-          :step="5"
-          suffix="%"
-          @update:model-value="patchDraw({ comboChance: $event })"
-        />
-      </Row>
+      <div class="sec-body">
+        <p class="muted">抽卡固定为纯随机。关掉拼卡后，就是抽到什么发什么。</p>
+      </div>
     </section>
 
     <p class="muted">改完立即生效，不需要刷新页面。</p>

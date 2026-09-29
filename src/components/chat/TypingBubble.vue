@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import Avatar from '@/components/common/Avatar.vue'
-import { useSettingsStore } from '@/stores/useSettingsStore'
+import { useProfileStore } from '@/stores/useProfileStore'
 
-const settings = useSettingsStore()
+const profile = useProfileStore()
 </script>
 
 <template>
   <div class="row">
-    <Avatar role="them" :size="40" />
-    <div class="bubble" :class="{ tail: settings.ui.bubbleTail }">
-      <i /><i /><i />
+    <div class="stack">
+      <div class="who">{{ profile.nameOf('them') }}</div>
+      <div class="bubble">
+        <i /><i /><i />
+      </div>
     </div>
   </div>
 </template>
@@ -17,9 +18,22 @@ const settings = useSettingsStore()
 <style scoped>
 .row {
   display: flex;
-  gap: 8px;
   padding: 3px 12px;
   animation: fade-up 0.2s ease both;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.who {
+  margin: 0 4px 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.04em;
+  color: var(--text-3);
 }
 
 .bubble {
@@ -31,18 +45,6 @@ const settings = useSettingsStore()
   border-radius: var(--bubble-radius);
   background: var(--bubble-them);
   box-shadow: var(--shadow-sm);
-}
-
-.bubble.tail::before {
-  content: '';
-  position: absolute;
-  top: 14px;
-  left: -5px;
-  width: 10px;
-  height: 10px;
-  background: inherit;
-  transform: rotate(45deg);
-  border-radius: 2px;
 }
 
 i {

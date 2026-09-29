@@ -38,5 +38,11 @@ export const useStickerStore = defineStore('stickers', () => {
     if (target) target.name = name
   }
 
-  return { stickers, add, remove, rename }
+  /** 清空全部表情（连同图片资源），字卡与设置不受影响 */
+  async function clear(): Promise<void> {
+    await Promise.all(stickers.value.map((item) => deleteAsset(item.id).catch(() => undefined)))
+    stickers.value = []
+  }
+
+  return { stickers, add, remove, rename, clear }
 })

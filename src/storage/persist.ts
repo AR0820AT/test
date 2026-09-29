@@ -39,35 +39,6 @@ export function usePersisted<T>(key: string, fallback: () => T): Ref<T> {
   return state
 }
 
-/** 取出全部持久化数据（备份用），键名不含前缀 */
-export function dumpAll(): Record<string, unknown> {
-  const out: Record<string, unknown> = {}
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const raw = localStorage.key(i)
-    if (!raw || !raw.startsWith(PREFIX)) continue
-    try {
-      out[raw.slice(PREFIX.length)] = JSON.parse(localStorage.getItem(raw) as string)
-    } catch {
-      /* 跳过损坏项 */
-    }
-  }
-  return out
-}
-
-/** 用备份数据整体覆盖本地（导入用） */
-export function replaceAll(data: Record<string, unknown>): void {
-  Object.entries(data).forEach(([key, value]) => saveJson(key, value))
-}
-
-export function clearPersisted(): void {
-  const keys: string[] = []
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const raw = localStorage.key(i)
-    if (raw && raw.startsWith(PREFIX)) keys.push(raw)
-  }
-  keys.forEach((key) => localStorage.removeItem(key))
-}
-
 /** 估算占用体积（字符数近似字节） */
 export function estimateSize(): number {
   let total = 0

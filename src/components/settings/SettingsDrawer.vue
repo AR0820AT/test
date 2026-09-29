@@ -99,8 +99,10 @@ h2 {
   flex: 1;
   margin: 0;
   text-align: center;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: calc(var(--fs-base) + 3px);
+  font-weight: 500;
+  letter-spacing: 0.4px;
 }
 
 .body {

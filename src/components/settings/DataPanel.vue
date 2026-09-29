@@ -4,47 +4,28 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useChatStore } from '@/stores/useChatStore'
 import { useStickerStore } from '@/stores/useStickerStore'
 import { useUiStore } from '@/stores/useUiStore'
+import { clearAssets } from '@/storage/assets'
 import { estimateSize } from '@/storage/persist'
-import { downloadText, exportBackup, importBackup, wipeAll } from '@/storage/backup'
 
 const chat = useChatStore()
 const cardStore = useCardStore()
 const stickerStore = useStickerStore()
 const ui = useUiStore()
 
-const fileInput = ref<HTMLInputElement | null>(null)
 const confirmWipe = ref(false)
 
 const sizeKb = computed(() => Math.max(1, Math.round(estimateSize() / 1024)))
 
-async function exportData(): Promise<void> {
-  const text = await exportBackup()
-  const stamp = new Date().toISOString().slice(0, 10)
-  downloadText(`card-chat-${stamp}.json`, text)
-  ui.toast('备份已导出')
-}
-
-async function importData(event: Event): Promise<void> {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file) return
-  try {
-    await importBackup(await file.text())
-    ui.toast('导入成功，正在刷新…')
-    setTimeout(() => window.location.reload(), 700)
-  } catch {
-    ui.toast('读不出来，确认是本应用导出的备份')
-  }
-}
-
+/** 清空聊天与表情：字卡库、双方昵称和所有设置都保留 */
 async function wipe(): Promise<void> {
   if (!confirmWipe.value) {
     confirmWipe.value = true
     ui.toast('再点一次「确认清空」就真的没了')
     return
   }
-  await wipeAll()
+  chat.clear()
+  await stickerStore.clear()
+  await clearAssets()
   window.location.reload()
 }
 
@@ -85,23 +66,13 @@ function clearChat(): void {
     </section>
 
     <section class="section">
-      <div class="sec-title">备份与恢复</div>
-      <div class="sec-body">
-        <button class="btn block" @click="exportData">导出备份（含图片）</button>
-        <button class="btn block" @click="fileInput?.click()">从备份导入</button>
-        <input ref="fileInput" type="file" accept="application/json,.json" hidden @change="importData" />
-        <p class="muted">导入会覆盖当前全部数据，导入后会自动刷新页面。</p>
-      </div>
-    </section>
-
-    <section class="section">
       <div class="sec-title">清理</div>
       <div class="sec-body">
         <button class="btn block" @click="clearChat">只清空聊天记录</button>
         <button class="btn block danger" @click="wipe">
-          {{ confirmWipe ? '确认清空全部数据' : '清空全部数据' }}
+          {{ confirmWipe ? '确认清空聊天与表情包' : '清空聊天与表情包' }}
         </button>
-        <p class="muted">清空后无法恢复，建议先导出备份。</p>
+        <p class="muted">字卡库、双方昵称和全部设置都会保留。清空后无法恢复。</p>
       </div>
     </section>
   </div>
@@ -128,12 +99,12 @@ function clearChat(): void {
 }
 
 .stat strong {
-  font-size: 17px;
+  font-size: var(--fs-lg);
   font-variant-numeric: tabular-nums;
 }
 
 .stat span {
-  font-size: 11px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
 }
 </style>

@@ -33,8 +33,11 @@ body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
-  font-size: 16px;
-  line-height: 1.5;
+  /* 宋体 + Cormorant 字形偏秀气；基准字号由「外观 → 字号」控制 */
+  font-size: var(--fs-base);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.55;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   /* 禁止双击缩放，同时不影响滚动 */
@@ -173,7 +176,7 @@ html[data-anim='off'] *::after {
 
 .sec-title {
   padding: 12px 12px 6px;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
 }
 
@@ -187,7 +190,7 @@ html[data-anim='off'] *::after {
   border-radius: 10px;
   background: var(--surface);
   border: 1px solid var(--glass-border);
-  font-size: 14px;
+  font-size: calc(var(--fs-base) - 1px);
   backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   transition: transform 0.14s ease, background 0.16s ease;
@@ -219,7 +222,7 @@ html[data-anim='off'] *::after {
   border-radius: 10px;
   border: 1px solid var(--glass-border);
   background: var(--input-bg);
-  font-size: 15px;
+  font-size: calc(var(--fs-base) - 1px);
   backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
 }
@@ -236,7 +239,7 @@ html[data-anim='off'] *::after {
 }
 
 .muted {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
   line-height: 1.55;
 }
@@ -264,7 +267,7 @@ html[data-anim='off'] *::after {
 /* 窄屏：压缩间距，保证一行放得下 */
 @media (max-width: 360px) {
   body {
-    font-size: 15px;
+    font-size: calc(var(--fs-base) - 1px);
   }
 
   .panel {
@@ -279,7 +282,7 @@ html[data-anim='off'] *::after {
 
   .btn {
     min-height: 36px;
-    font-size: 13px;
+    font-size: calc(var(--fs-base) - 2px);
   }
 }
 

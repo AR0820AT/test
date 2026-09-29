@@ -9,8 +9,7 @@ export type Role = 'me' | 'them'
 /** 消息种类：文字（含 emoji）/ 自定义表情包 / 图片 */
 export type MsgKind = 'text' | 'sticker' | 'image'
 
-/** 抽卡策略 */
-export type DrawStrategy = 'random' | 'sequential' | 'shuffle'
+
 
 /** 字卡语言 */
 export type LangCode = 'zh' | 'en'
@@ -28,8 +27,7 @@ export interface CardMeta {
   letter: string
 }
 
-/** 单词卡的输出方式 */
-export type WordMode = 'sentence' | 'word'
+
 
 /** 主题模式 */
 export type ThemeMode = 'light' | 'dark' | 'auto'
@@ -56,10 +54,9 @@ export interface Message {
   recalled?: boolean
 }
 
-/** 一方的人物资料 */
+/** 一方的人物资料（只保留昵称，界面上用名字牌代替头像） */
 export interface Profile {
   nickname: string
-  avatarId: string | null
 }
 
 /** 一张字卡：lines 为多连发内容，会逐条发出 */
@@ -94,10 +91,14 @@ export interface ReplySettings {
   minDelaySec: number
   /** 最长多久回复（秒） */
   maxDelaySec: number
-  /** 多连发时每条之间的间隔（秒） */
-  lineGapSec: number
-  /** 每条消息发出前「正在输入」显示时长（秒） */
-  typingSec: number
+  /** 已读不回的概率（0-100） */
+  ignoreChance: number
+  /** 多连发时每条之间的随机间隔（秒） */
+  lineGapMinSec: number
+  lineGapMaxSec: number
+  /** 每条消息发出前「正在输入」的随机时长（秒） */
+  typingMinSec: number
+  typingMaxSec: number
 }
 
 export interface ProactiveSettings {
@@ -109,41 +110,27 @@ export interface ProactiveSettings {
 }
 
 export interface DrawSettings {
-  strategy: DrawStrategy
-  /** 拼卡成句：一次抽多张卡拼成一句话发出 */
+  /** 拼卡成句：随机抽几张卡、打乱顺序拼在一起（关掉就永远只发单张卡原文） */
   combo: boolean
-  /** 触发拼卡成句的概率（0-100） */
-  comboChance: number
-  /** 抽到单词卡时：sentence＝套进句子里说，word＝原样发单词 */
-  wordMode: WordMode
 }
+
+/** 字号档位：小 / 标准 / 大 */
+export type FontScale = 'sm' | 'md' | 'lg'
 
 export interface UiSettings {
   theme: ThemeMode
   /** 强调色，直接注入 CSS 变量 */
   accent: string
   animations: boolean
-  bubbleTail: boolean
   /** 毛玻璃（背景模糊）效果，关闭后可提升低端机性能 */
   glass: boolean
+  /** 正文基准字号档位 */
+  fontScale: FontScale
 }
 
 export interface Settings {
-  /** 总开关：暂停后对方不再自动回复/主动发消息 */
-  paused: boolean
   reply: ReplySettings
   proactive: ProactiveSettings
   draw: DrawSettings
   ui: UiSettings
-}
-
-/** 备份文件格式 */
-export interface BackupFile {
-  app: 'card-chat'
-  version: number
-  createdAt: number
-  /** localStorage 的全部键值对 */
-  data: Record<string, unknown>
-  /** 图片资源：id -> dataURL */
-  images: Record<string, string>
 }

@@ -8,19 +8,14 @@ import Icon from '@/components/ui/Icon.vue'
 import { brain } from '@/engine/brain'
 import { useChatStore } from '@/stores/useChatStore'
 import { useProfileStore } from '@/stores/useProfileStore'
-import { useSettingsStore } from '@/stores/useSettingsStore'
 import { useStickerStore } from '@/stores/useStickerStore'
 import { useUiStore } from '@/stores/useUiStore'
 import { useQuoting } from '@/composables/useQuoting'
 import { formatTime, needTimeDivider } from '@/utils/format'
-import { putAsset } from '@/storage/assets'
-import { compressImage } from '@/utils/image'
-import { uid } from '@/utils/id'
 import type { Message, Sticker } from '@/types'
 
 const chat = useChatStore()
 const profile = useProfileStore()
-const settings = useSettingsStore()
 const stickerStore = useStickerStore()
 const ui = useUiStore()
 const quoting = useQuoting()
@@ -29,12 +24,10 @@ const draft = ref('')
 const panel = ref<'none' | 'emoji' | 'sticker'>('none')
 const scroller = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLTextAreaElement | null>(null)
-const imageInput = ref<HTMLInputElement | null>(null)
 /** 用户手动往上翻时，不再自动吸底，避免打断阅读 */
 const stickBottom = ref(true)
 
 const canSend = computed(() => draft.value.trim().length > 0)
-const themName = computed(() => profile.nameOf('them'))
 
 function needDivider(index: number): boolean {
   const prev = chat.messages[index - 1]
@@ -114,28 +107,6 @@ async function uploadStickers(event: Event): Promise<void> {
   ui.toast(ok ? `已添加 ${ok} 个表情` : '添加失败，换张图片试试')
 }
 
-async function sendImages(event: Event): Promise<void> {
-  const input = event.target as HTMLInputElement
-  const files = Array.from(input.files ?? [])
-  input.value = ''
-  if (!files.length) return
-  ui.toast('正在处理图片…', 1200)
-  for (const file of files) {
-    try {
-      const blob = await compressImage(file, 1280, 0.85)
-      const assetId = uid('img_')
-      await putAsset(assetId, blob)
-      chat.send({ role: 'me', assetId, kind: 'image', quote: quoting.quoting.value ?? null })
-    } catch {
-      ui.toast('有图片处理失败了')
-    }
-  }
-  quoting.set(null)
-  stickBottom.value = true
-  void scrollToBottom(true)
-  brain.notifyUserSent()
-}
-
 async function drawNow(): Promise<void> {
   stickBottom.value = true
   await brain.drawNow()
@@ -158,14 +129,7 @@ onMounted(() => {
 <template>
   <main class="chat">
     <div ref="scroller" class="scroller no-scrollbar" @scroll.passive="onScroll">
-      <div v-if="!chat.messages.length" class="empty">
-        <Icon name="cards" :size="40" />
-        <p class="title">还没有消息</p>
-        <p class="desc">点下面的骰子让「{{ themName }}」抽一张字卡，或者自己先说点什么</p>
-        <button class="primary" @click="drawNow">抽一张字卡</button>
-      </div>
-
-      <template v-else>
+      <template v-if="chat.messages.length">
         <div v-for="(message, index) in chat.messages" :key="message.id">
           <div v-if="needDivider(index)" class="divider">{{ formatTime(message.createdAt) }}</div>
           <div v-if="message.recalled" class="sys-tip">{{ recallTip(message) }}</div>
@@ -174,9 +138,7 @@ onMounted(() => {
         <TypingBubble v-if="chat.typing" />
       </template>
 
-      <div class="tail">
-        <span v-if="settings.settings.paused">自动回复已暂停</span>
-      </div>
+      <div class="tail"></div>
     </div>
 
     <footer class="composer">
@@ -196,9 +158,6 @@ onMounted(() => {
         <button class="tool" aria-label="表情包" @click="togglePanel('sticker')">
           <Icon name="cards" />
         </button>
-        <button class="tool" aria-label="发送图片" @click="imageInput?.click()">
-          <Icon name="image" />
-        </button>
 
         <textarea
           ref="inputEl"
@@ -210,7 +169,7 @@ onMounted(() => {
           @keydown.enter.exact.prevent="sendText"
         />
 
-        <button class="tool" aria-label="立即抽一张字卡" @click="drawNow">
+        <button class="tool" aria-label="戳戳对方" @click="drawNow">
           <Icon name="dice" />
         </button>
         <button class="send" :class="{ off: !canSend }" aria-label="发送" @click="sendText">
@@ -220,8 +179,6 @@ onMounted(() => {
 
       <EmojiPanel v-if="panel === 'emoji'" @pick="pickEmoji" />
       <StickerPanel v-if="panel === 'sticker'" @pick="pickSticker" @upload="uploadStickers" />
-
-      <input ref="imageInput" type="file" accept="image/*" multiple hidden @change="sendImages" />
     </footer>
   </main>
 </template>
@@ -245,51 +202,24 @@ onMounted(() => {
   -webkit-overflow-scrolling: touch;
 }
 
-.empty {
-  padding: 60px 32px;
-  text-align: center;
-  color: var(--text-2);
-}
-
-.empty .title {
-  margin: 12px 0 4px;
-  font-size: 16px;
-  color: var(--text);
-}
-
-.empty .desc {
-  margin: 0 0 18px;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.primary {
-  padding: 9px 18px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-size: 14px;
-  box-shadow: var(--shadow-sm);
-}
-
 .divider {
   margin: 10px auto 6px;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-3);
 }
 
 .sys-tip {
   margin: 8px auto;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-3);
 }
 
 .tail {
   height: 8px;
   text-align: center;
-  font-size: 11px;
+  font-size: calc(var(--fs-base) - 4px);
   color: var(--text-3);
 }
 
@@ -311,7 +241,7 @@ onMounted(() => {
   border-radius: 10px;
   background: var(--surface);
   border: 1px solid var(--glass-border);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
   backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.5));
@@ -363,6 +293,7 @@ onMounted(() => {
   border-radius: 12px;
   border: 1px solid var(--glass-border);
   background: var(--input-bg);
+  font-size: var(--fs-base);
   backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.6));
   resize: none;

@@ -17,8 +17,6 @@ const ICONS: Record<string, string> = {
   database: '<ellipse cx="12" cy="6.5" rx="7.5" ry="3"/><path d="M4.5 6.5v11c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-11"/><path d="M19.5 12c0 1.7-3.4 3-7.5 3S4.5 13.7 4.5 12"/>',
   moon: '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
-  pause: '<path d="M9 6v12M15 6v12"/>',
-  play: '<path d="M8 5l11 7-11 7z"/>',
   trash: '<path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/>',
   quote: '<path d="M10 8.5l-5 4 5 4M5 12.5h8.5A5 5 0 0 0 18.5 7.5V6"/>',
   copy: '<rect x="9" y="9" width="11" height="11" rx="2.2"/><path d="M15 9V6.5A2.5 2.5 0 0 0 12.5 4H6.5A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15H9"/>',

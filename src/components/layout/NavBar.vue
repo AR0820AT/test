@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Icon from '@/components/ui/Icon.vue'
-import { brain } from '@/engine/brain'
 import { useTheme } from '@/composables/useTheme'
 import { useProfileStore } from '@/stores/useProfileStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
@@ -19,13 +18,6 @@ function toggleTheme(): void {
   ui.toast(isDark.value ? '已切换到浅色' : '已切换到深色')
 }
 
-function togglePause(): void {
-  const next = !settings.settings.paused
-  settings.update({ paused: next })
-  ui.toast(next ? '已暂停自动回复' : '已恢复自动回复')
-  // 恢复时重新计算主动消息时间
-  if (!next) brain.restartProactive()
-}
 </script>
 
 <template>
@@ -36,14 +28,10 @@ function togglePause(): void {
 
     <div class="title">
       <h1>{{ themName }}</h1>
-      <span v-if="settings.settings.paused" class="status paused">已暂停</span>
     </div>
 
     <button class="icon-btn" aria-label="切换主题" @click="toggleTheme">
       <Icon :name="isDark ? 'sun' : 'moon'" />
-    </button>
-    <button class="icon-btn" aria-label="暂停或恢复自动回复" @click="togglePause">
-      <Icon :name="settings.settings.paused ? 'play' : 'pause'" />
     </button>
   </header>
 </template>
@@ -84,22 +72,13 @@ function togglePause(): void {
 
 h1 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
+  font-family: var(--font-display);
+  font-size: calc(var(--fs-base) + 4px);
+  font-weight: 500;
+  letter-spacing: 0.4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.status {
-  display: block;
-  font-size: 11px;
-  color: var(--text-2);
-  margin-top: -1px;
-}
-
-.status.paused {
-  color: var(--danger);
-}
 </style>

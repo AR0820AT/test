@@ -3,8 +3,8 @@ import { computed } from 'vue'
 import Row from '@/components/ui/Row.vue'
 import Segmented from '@/components/ui/Segmented.vue'
 import Switch from '@/components/ui/Switch.vue'
-import { ACCENTS, useSettingsStore } from '@/stores/useSettingsStore'
-import type { ThemeMode } from '@/types'
+import { ACCENTS, FONT_SCALES, useSettingsStore } from '@/stores/useSettingsStore'
+import type { FontScale, ThemeMode } from '@/types'
 
 const settings = useSettingsStore()
 
@@ -24,14 +24,14 @@ const animations = computed({
   set: (value: boolean) => settings.updateUi({ animations: value }),
 })
 
-const bubbleTail = computed({
-  get: () => settings.ui.bubbleTail,
-  set: (value: boolean) => settings.updateUi({ bubbleTail: value }),
-})
-
 const glass = computed({
   get: () => settings.ui.glass,
   set: (value: boolean) => settings.updateUi({ glass: value }),
+})
+
+const fontScale = computed({
+  get: () => settings.ui.fontScale,
+  set: (value: FontScale) => settings.updateUi({ fontScale: value }),
 })
 </script>
 
@@ -44,11 +44,14 @@ const glass = computed({
       <Row label="动效">
         <Switch v-model="animations" />
       </Row>
-      <Row label="气泡小尖角">
-        <Switch v-model="bubbleTail" />
-      </Row>
       <Row label="毛玻璃" hint="面板与气泡带背景模糊，卡顿时可关掉">
         <Switch v-model="glass" />
+      </Row>
+      <Row label="字号" hint="影响聊天气泡与全界面文字大小">
+        <Segmented
+          v-model="fontScale"
+          :options="FONT_SCALES.map((item) => ({ label: item.label, value: item.value }))"
+        />
       </Row>
     </section>
 
@@ -72,7 +75,7 @@ const glass = computed({
       </div>
     </section>
 
-    <p class="muted">强调色会同时用在自己的气泡、按钮和开关上。</p>
+    <p class="muted">强调色会用在按钮、开关和「正在输入」等元素上。</p>
   </div>
 </template>
 

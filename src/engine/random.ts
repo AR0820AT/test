@@ -30,32 +30,24 @@ export function pickWeighted<T>(list: readonly T[], weightOf: (item: T) => numbe
   return usable[usable.length - 1]
 }
 
-/**
- * 洗牌袋：一轮内每张卡都会出现一次，且不会连续抽到同一张
- * 用于「不重复」抽取策略，避免短时间内连续抽到同一张卡
- */
-export class ShuffleBag<T> {
-  private remaining: T[] = []
-  private last: T | undefined
-
-  constructor(private source: () => T[]) {}
-
-  draw(): T | undefined {
-    const source = this.source()
-    if (!source.length) return undefined
-    if (!this.remaining.length) {
-      if (source.length === 1) {
-        this.remaining = [...source]
-      } else {
-        // 重新洗牌：除上一张外先入袋，上一张放到最后一轮位置，保证全覆盖且不连抽
-        const others = source.filter((item) => item !== this.last)
-        this.remaining = others
-        if (this.last !== undefined) this.remaining.push(this.last)
-      }
-    }
-    const index = Math.floor(Math.random() * this.remaining.length)
-    const value = this.remaining.splice(index, 1)[0]
-    this.last = value
-    return value
+/** 洗牌：返回一个新数组，原数组不变 */
+export function shuffle<T>(list: readonly T[]): T[] {
+  const out = [...list]
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
   }
+  return out
+}
+
+/** 按权重抽一个下标，权重数组总和任意 */
+export function pickWeightedIndex(weights: readonly number[]): number {
+  const total = weights.reduce((sum, item) => sum + Math.max(0, item), 0)
+  if (total <= 0) return 0
+  let roll = Math.random() * total
+  for (let i = 0; i < weights.length; i += 1) {
+    roll -= Math.max(0, weights[i])
+    if (roll <= 0) return i
+  }
+  return weights.length - 1
 }
