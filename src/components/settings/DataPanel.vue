@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useCardStore } from '@/stores/useCardStore'
 import { useChatStore } from '@/stores/useChatStore'
 import { useStickerStore } from '@/stores/useStickerStore'
 import { useUiStore } from '@/stores/useUiStore'
 import { clearAssets } from '@/storage/assets'
 import { estimateSize } from '@/storage/persist'
+import { chineseFontApplied } from '@/utils/fonts'
 
 const chat = useChatStore()
 const cardStore = useCardStore()
@@ -15,6 +16,16 @@ const ui = useUiStore()
 const confirmWipe = ref(false)
 
 const sizeKb = computed(() => Math.max(1, Math.round(estimateSize() / 1024)))
+
+/** 中文有没有真的用上思源宋体：显示出来方便排查手机上的字体问题 */
+const fontOk = ref(false)
+onMounted(() => {
+  const check = (): void => {
+    fontOk.value = chineseFontApplied()
+  }
+  void (document.fonts ? document.fonts.ready.then(check) : Promise.resolve()).then(check)
+  window.setTimeout(check, 1500)
+})
 
 /** 清空聊天与表情：字卡库、双方昵称和所有设置都保留 */
 async function wipe(): Promise<void> {
@@ -73,6 +84,15 @@ function clearChat(): void {
           {{ confirmWipe ? '确认清空聊天与表情包' : '清空聊天与表情包' }}
         </button>
         <p class="muted">字卡库、双方昵称和全部设置都会保留。清空后无法恢复。</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="sec-title">字体</div>
+      <div class="sec-body">
+        <p class="muted">
+          中文字体：{{ fontOk ? '思源宋体（自托管，正常）' : '没加载出来，当前显示的是系统字体' }}
+        </p>
       </div>
     </section>
   </div>
