@@ -152,17 +152,17 @@ function onTouchEnd(): void {
   color: var(--text-2);
 }
 
-/* 一句里来自不同字卡的片段：深浅递增，一眼能看出是拼出来的 */
+/* 一句里来自不同字卡的片段：用不同的红/蓝色区分，一眼能看出是拼出来的 */
 .seg.s1 {
-  opacity: 0.78;
+  color: var(--seg-1);
 }
 
 .seg.s2 {
-  opacity: 0.62;
+  color: var(--seg-2);
 }
 
 .seg.s3 {
-  opacity: 0.48;
+  color: var(--seg-3);
 }
 
 .pic {
