@@ -214,6 +214,37 @@ html[data-glass='off'] .aurora {
   display: none;
 }
 
+/* 手机屏窄，桌面那套位置会让光斑全挤在角上；这里放大并往画布里收，左右各留一团 */
+@media (max-width: 560px) {
+  .blob-a {
+    top: -12vh;
+    left: -20vw;
+    width: 78vw;
+    height: 78vw;
+  }
+
+  .blob-b {
+    bottom: -8vh;
+    right: -10vw;
+    width: 72vw;
+    height: 72vw;
+  }
+
+  /* 桌面放在右侧，手机上挪到左下，免得两团深色压在同一边 */
+  .blob-c {
+    top: 52vh;
+    right: auto;
+    left: -16vw;
+    width: 62vw;
+    height: 62vw;
+    opacity: 0.45;
+  }
+
+  html[data-theme='dark'] .blob-c {
+    opacity: 0.26;
+  }
+}
+
 @keyframes drift-a {
   from {
     transform: translate3d(0, 0, 0) scale(1);

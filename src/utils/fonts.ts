@@ -5,17 +5,7 @@
  * 19MB 的 VF 会被它直接静默跳过、退回系统字体，所以这里统一加载这种静态分片
  */
 
-import { reactive } from 'vue'
-
 import { ZH_SLICES } from '@/data/zhSlices'
-
-/** 给「设置 → 数据管理 → 字体诊断」看的运行状态 */
-export const fontDiag = reactive({
-  state: 'idle' as 'idle' | 'loading' | 'done' | 'error',
-  total: 0,
-  loaded: 0,
-  error: '',
-})
 
 interface Face {
   family: string
@@ -107,11 +97,6 @@ export function loadFonts(onProgress?: (pct: number) => void): Promise<void> {
     onProgress?.(100)
     return Promise.resolve()
   }
-  fontDiag.state = 'loading'
-  fontDiag.error = ''
-  fontDiag.total = FACES.length
-  fontDiag.loaded = 0
-
   const work = async (): Promise<void> => {
     const urls = FACES.map((face) => urlOf(face.file))
     const sizes = await Promise.all(urls.map(headBytes))
@@ -128,34 +113,11 @@ export function loadFonts(onProgress?: (pct: number) => void): Promise<void> {
           loaded += delta
           if (total > 0) onProgress?.(Math.min(99, Math.round((loaded / total) * 100)))
         })
-        fontDiag.loaded++
       }
     }
     await Promise.all(Array.from({ length: Math.min(CONCURRENCY, FACES.length) }, worker))
     onProgress?.(100)
   }
 
-  return work().then(
-    () => {
-      fontDiag.state = 'done'
-    },
-    (error: unknown) => {
-      fontDiag.state = 'error'
-      fontDiag.error = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
-      throw error
-    },
-  )
-}
-
-export type FontStatus = 'loaded' | 'loading' | 'missing'
-
-/** 中文字体到底用上了没有：直接问 document.fonts */
-export async function chineseFontStatus(): Promise<FontStatus> {
-  if (!document.fonts) return 'missing'
-  await document.fonts.ready
-  const faces = Array.from(document.fonts).filter(
-    (face) => face.family.replace(/['"]/g, '') === 'Noto Serif SC',
-  )
-  if (!faces.length) return 'missing'
-  return faces.some((face) => face.status === 'loaded') ? 'loaded' : 'loading'
+  return work()
 }
