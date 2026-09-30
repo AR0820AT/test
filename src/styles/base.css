@@ -44,6 +44,13 @@ body {
   touch-action: manipulation;
 }
 
+/* 全站固定一个字重（500）：中文只有一个字面，字重对不上时 Safari 会合成或回落成系统字体 */
+*,
+*::before,
+*::after {
+  font-weight: 500;
+}
+
 /* 毛玻璃：背景模糊 + 提亮，关掉毛玻璃时自动失效 */
 .frost {
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));

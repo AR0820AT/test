@@ -11,10 +11,10 @@ interface Face {
   file: string
 }
 
-/** 英文正文与标题是单文件；中文走 zh.css 的 unicode-range 分片，不在这里注册 */
 const FACES: Face[] = [
+  { family: 'Noto Serif SC', weight: '500', file: 'SourceHanSerifSC-VF.otf.woff2' },
   { family: 'Cormorant Garamond', weight: '500', file: 'cormorant-garamond-500.woff2' },
-  { family: 'Pirata One', weight: '400', file: 'pirata-one-400.woff2' },
+  { family: 'Pirata One', weight: '500', file: 'pirata-one-400.woff2' },
 ]
 
 const ZH_SAMPLE = '中文字体'
