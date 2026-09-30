@@ -89,16 +89,27 @@ watchEffect(() => {
 // 字体全部下载完毕（带进度）才放行锁屏，期间显示毛玻璃进度条
 const booting = ref(true)
 const progress = ref(0)
-onMounted(() => {
-  const done = loadFonts((pct) => {
-    progress.value = pct
-  })
-  // 最坏情况兜底：15s 内没加载完也照常进，别卡在启动页（此时用系统字体）
-  const timeout = new Promise<void>((resolve) => window.setTimeout(resolve, 15000))
-  Promise.race([done, timeout]).finally(() => {
-    booting.value = false
-  })
-  done.catch((error) => console.warn('[card-chat] 字体加载失败，用系统字体兜底', error))
+const fontFailed = ref(false)
+
+onMounted(async () => {
+  const startedAt = performance.now()
+  // 最坏情况兜底：20s 内没加载完也照常进，别卡在启动页（此时用系统字体）
+  const timeout = new Promise<void>((resolve) => window.setTimeout(resolve, 20000))
+  await Promise.race([
+    loadFonts((pct) => {
+      progress.value = pct
+    }).catch((error) => {
+      fontFailed.value = true
+      console.warn('[card-chat] 字体加载失败，用系统字体兜底', error)
+    }),
+    timeout,
+  ])
+  // 至少显示 1.2s：否则加载失败时会一闪而过，用户根本看不到进度条
+  const elapsed = performance.now() - startedAt
+  if (elapsed < 1200) {
+    await new Promise((resolve) => window.setTimeout(resolve, 1200 - elapsed))
+  }
+  booting.value = false
 })
 </script>
 
@@ -122,7 +133,7 @@ onMounted(() => {
     </transition>
 
     <ToastHost />
-    <Splash v-if="booting" :progress="progress" />
+    <Splash v-if="booting" :progress="progress" :failed="fontFailed" />
   </div>
 </template>
 

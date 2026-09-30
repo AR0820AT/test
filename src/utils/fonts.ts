@@ -1,27 +1,39 @@
 /**
  * 字体加载：用 fetch 流式下载，带字节级进度，全部就绪后再放行界面
- * 中文字体是静态子集（约 2MB）。iOS Safari 对超大 / 可变字体文件支持不稳，统一走这里加载，
- * 不再放在 CSS 里 —— 这样下载进度可控，也不会出现「CSS 字体被浏览器静默跳过」的情况
+ *
+ * 中文用 Noto Serif SC（思源宋体）的静态 glyf 分片 —— iOS Safari 不认 CFF2（可变字体表），
+ * 19MB 的 VF 会被它直接静默跳过、退回系统字体，所以这里统一加载这种静态分片
  */
+
+import { ZH_SLICES } from '@/data/zhSlices'
 
 interface Face {
   family: string
   weight: string
   file: string
+  unicodeRange?: string
 }
 
+/** 中文：每片覆盖一段 unicode-range；英文正文 / 标题：单文件 */
 const FACES: Face[] = [
-  { family: 'Noto Serif SC', weight: '500', file: 'SourceHanSerifSC-500.woff2' },
+  ...ZH_SLICES.map((slice) => ({
+    family: 'Noto Serif SC',
+    weight: '500',
+    file: `zh/${slice.file}`,
+    unicodeRange: slice.range,
+  })),
   { family: 'Cormorant Garamond', weight: '500', file: 'cormorant-garamond-500.woff2' },
   { family: 'Pirata One', weight: '500', file: 'pirata-one-400.woff2' },
 ]
+
+const CONCURRENCY = 6
 
 /** 按部署路径拼字体地址（GitHub Pages 放在子目录下也能取到） */
 function urlOf(file: string): string {
   return new URL(`${import.meta.env.BASE_URL}fonts/${file}`, window.location.href).href
 }
 
-/** 取字体文件大小（HEAD），拿不到就返回 0，进度条退化为不确定 */
+/** 取字体文件大小（HEAD），拿不到就返回 0 */
 async function headBytes(url: string): Promise<number> {
   try {
     const res = await fetch(url, { method: 'HEAD' })
@@ -31,9 +43,8 @@ async function headBytes(url: string): Promise<number> {
   }
 }
 
-/** 流式下载一个字体文件，边下边回调已下载字节数；下完注册进 document.fonts */
-async function fetchFont(face: Face, onBytes: (delta: number) => void): Promise<void> {
-  const url = urlOf(face.file)
+/** 流式下载一个字体面，边下边回调已下载字节数；下完注册进 document.fonts */
+async function fetchFace(url: string, face: Face, onBytes: (delta: number) => void): Promise<void> {
   const res = await fetch(url)
   if (!res.ok || !res.body) throw new Error(`字体下载失败：${face.file} (${res.status})`)
   const reader = res.body.getReader()
@@ -54,7 +65,11 @@ async function fetchFont(face: Face, onBytes: (delta: number) => void): Promise<
     buf.set(chunk, pos)
     pos += chunk.length
   }
-  const font = new FontFace(face.family, buf, { weight: face.weight, display: 'swap' })
+  const font = new FontFace(face.family, buf, {
+    weight: face.weight,
+    display: 'swap',
+    ...(face.unicodeRange ? { unicodeRange: face.unicodeRange } : {}),
+  })
   await font.load()
   document.fonts.add(font)
 }
@@ -66,18 +81,24 @@ export function loadFonts(onProgress?: (pct: number) => void): Promise<void> {
     return Promise.resolve()
   }
   return (async () => {
-    const sizes = await Promise.all(FACES.map((face) => headBytes(urlOf(face.file))))
+    const urls = FACES.map((face) => urlOf(face.file))
+    const sizes = await Promise.all(urls.map(headBytes))
     const total = sizes.reduce((sum, size) => sum + size, 0)
     let loaded = 0
     onProgress?.(0)
-    await Promise.all(
-      FACES.map((face) =>
-        fetchFont(face, (delta: number) => {
+
+    let cursor = 0
+    async function worker(): Promise<void> {
+      for (;;) {
+        const index = cursor++
+        if (index >= FACES.length) return
+        await fetchFace(urls[index], FACES[index], (delta) => {
           loaded += delta
           if (total > 0) onProgress?.(Math.min(99, Math.round((loaded / total) * 100)))
-        }),
-      ),
-    )
+        })
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, FACES.length) }, worker))
     onProgress?.(100)
   })()
 }

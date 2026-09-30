@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps<{ progress: number }>()
+const props = withDefaults(defineProps<{ progress: number; failed?: boolean }>(), { failed: false })
 
 const pct = computed(() => Math.max(0, Math.min(100, Math.round(props.progress))))
 </script>
@@ -10,7 +10,7 @@ const pct = computed(() => Math.max(0, Math.min(100, Math.round(props.progress))
   <div class="splash">
     <div class="card">
       <div class="title">Card Chat</div>
-      <div class="sub">正在加载字体…</div>
+      <div class="sub">{{ failed ? '字体没加载出来，先用系统字体显示' : '正在加载字体…' }}</div>
       <div class="bar">
         <div class="fill" :style="{ width: pct + '%' }">
           <span class="sheen" />

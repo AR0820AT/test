@@ -2,7 +2,7 @@
  * 极简 Service Worker：缓存应用外壳，实现离线打开与「添加到主屏幕」
  * 只做 GET 请求，数据本身存在 localStorage / IndexedDB，不受影响
  */
-const CACHE = 'card-chat-v7'
+const CACHE = 'card-chat-v8'
 const SHELL = [
   './',
   './index.html',
