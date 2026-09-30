@@ -6,9 +6,9 @@ import { loadJson, saveJson, usePersisted } from '@/storage/persist'
 import { buildSeedGroups, groupIdOf, letterGroupName } from '@/data/seedCards'
 import { CATEGORY_NAME, LANG_NAME, classifyCard } from '@/utils/text'
 
-/** 内置字卡库版本号：结构升级时会自动替换未改动过的内置库 */
+/** 内置字卡库版本号：结构或内置卡内容升级时，会自动同步未改动过的内置卡 */
 const SEED_VERSION_KEY = 'cardSeedVersion'
-const SEED_VERSION = 2
+const SEED_VERSION = 3
 /** 老版本内置分组 id */
 const LEGACY_IDS = new Set(['group_daily', 'group_warm'])
 
@@ -17,13 +17,33 @@ function seed(): CardGroup[] {
   return buildSeedGroups()
 }
 
+/**
+ * 把新版内置卡同步进已有字卡库：每个分组里的内置卡（id 以 seed_ 开头）整体换成新版，
+ * 用户自己加的字卡原样保留；新版多出来的分组直接补进去
+ */
+function syncSeed(groups: CardGroup[]): CardGroup[] {
+  const fresh = seed()
+  const freshById = new Map(fresh.map((group) => [group.id, group]))
+  const merged = groups.map((group) => {
+    const source = freshById.get(group.id)
+    if (!source) return group
+    const custom = group.cards.filter((card) => !card.id.startsWith('seed_'))
+    return { ...group, cards: [...source.cards, ...custom] }
+  })
+  const known = new Set(merged.map((group) => group.id))
+  fresh.forEach((group) => {
+    if (!known.has(group.id)) merged.push(group)
+  })
+  return merged
+}
+
 /** 只替换「还是老内置库、没被改过」的数据，用户自己加的字卡不受影响 */
 function migrate(groups: CardGroup[]): CardGroup[] {
   const version = loadJson<number>(SEED_VERSION_KEY, 0)
   if (version >= SEED_VERSION) return groups
   saveJson(SEED_VERSION_KEY, SEED_VERSION)
   const untouched = groups.length > 0 && groups.every((group) => LEGACY_IDS.has(group.id))
-  return untouched ? seed() : groups
+  return untouched ? seed() : syncSeed(groups)
 }
 
 /** 把文本框内容转成多条：以换行分隔 */
