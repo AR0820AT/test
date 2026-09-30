@@ -65,7 +65,11 @@
   /* 中文：思源宋体（Noto Serif SC，字重 500）；英文正文：Cormorant Garamond（古典衬线） */
   --font-zh: 'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', 'Songti SC', 'STSong',
     'SimSun', 'Noto Serif CJK SC', serif;
-  --font-en: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', 'Georgia', serif;
+  /*
+   * 英文链最后不能写通用族 serif：CSS 里一旦匹配到 serif 就定案了，后面的中文字体
+   * 再也不会被考虑（Safari 尤其严格），中文就会落到系统宋体上。通用族统一放在 --font-zh 末尾
+   */
+  --font-en: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', 'Georgia';
   /* 标题 / 名字牌：Pirata One（哥特风 Blackletter），中文自动回落到思源宋体 */
   --font-display: 'Pirata One', var(--font-zh);
 
