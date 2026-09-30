@@ -2,14 +2,10 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import { installNoZoom } from './composables/useNoZoom'
-import { ensureFonts } from './utils/fonts'
 import './styles/tokens.css'
 import './styles/base.css'
 
 createApp(App).use(createPinia()).mount('#app')
-
-// 再用 FontFace API 注册一遍自托管字体：有些手机浏览器会丢掉 CSS 里的 @font-face
-void ensureFonts()
 
 // 禁止双击放大与双指缩放，避免聊天界面被撑变形
 installNoZoom()

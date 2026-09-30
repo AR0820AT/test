@@ -1,19 +1,14 @@
 /**
  * 自托管字体：跟页面同一个域名，不依赖外网 CDN，手机上也能稳定显示
- * 中文：思源宋体可变字体 SourceHanSerifSC-VF（自带拉丁字形）
  * 英文正文：Cormorant Garamond；标题 / 名字牌：Pirata One
+ *
+ * 中文字体（思源宋体静态子集 SourceHanSerifSC-500.woff2）不走这里，改由
+ * src/utils/fonts.ts 用 fetch 流式下载并注册 —— 这样能有加载进度，也避开
+ * iOS Safari 对超大 / 可变字体文件偶发的「静默跳过」问题
  *
  * 每个字体只声明 500 这一个面，全站字重也统一为 500（见 base.css）：
  * 字重对不上时 Safari 会拿合成字形或干脆回落系统字体，字看着就不对了
  */
-@font-face {
-  font-family: 'Noto Serif SC';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('./SourceHanSerifSC-VF.otf.woff2') format('woff2');
-}
-
 @font-face {
   font-family: 'Cormorant Garamond';
   font-style: normal;

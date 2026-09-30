@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { watch, watchEffect } from 'vue'
+import { onMounted, ref, watch, watchEffect } from 'vue'
 import { brain } from '@/engine/brain'
 import { usePresenceStore } from '@/stores/usePresenceStore'
 import { FONT_SCALES, useSettingsStore } from '@/stores/useSettingsStore'
 import { useLockStore } from '@/stores/useLockStore'
 import { useTheme } from '@/composables/useTheme'
+import { loadFonts } from '@/utils/fonts'
 import NavBar from '@/components/layout/NavBar.vue'
 import ChatView from '@/components/chat/ChatView.vue'
 import SettingsDrawer from '@/components/settings/SettingsDrawer.vue'
 import ToastHost from '@/components/common/ToastHost.vue'
 import LockScreen from '@/components/lock/LockScreen.vue'
+import Splash from '@/components/common/Splash.vue'
 
 const settings = useSettingsStore()
 const presence = usePresenceStore()
@@ -83,6 +85,21 @@ watchEffect(() => {
   const scale = FONT_SCALES.find((item) => item.value === settings.ui.fontScale) ?? FONT_SCALES[1]
   document.documentElement.style.setProperty('--fs-base', `${scale.px}px`)
 })
+
+// 字体全部下载完毕（带进度）才放行锁屏，期间显示毛玻璃进度条
+const booting = ref(true)
+const progress = ref(0)
+onMounted(() => {
+  const done = loadFonts((pct) => {
+    progress.value = pct
+  })
+  // 最坏情况兜底：15s 内没加载完也照常进，别卡在启动页（此时用系统字体）
+  const timeout = new Promise<void>((resolve) => window.setTimeout(resolve, 15000))
+  Promise.race([done, timeout]).finally(() => {
+    booting.value = false
+  })
+  done.catch((error) => console.warn('[card-chat] 字体加载失败，用系统字体兜底', error))
+})
 </script>
 
 <template>
@@ -105,6 +122,7 @@ watchEffect(() => {
     </transition>
 
     <ToastHost />
+    <Splash v-if="booting" :progress="progress" />
   </div>
 </template>
 
