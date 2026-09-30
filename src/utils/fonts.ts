@@ -14,7 +14,14 @@ interface Face {
   unicodeRange?: string
 }
 
-/** 中文：每片覆盖一段 unicode-range；英文正文 / 标题：单文件 */
+/**
+ * 英文字体只覆盖拉丁字符：WebKit 若认为「前面的字体族匹配这个汉字」却发现没有字形，
+ * 会直接退回系统字体，而不是继续往后找 Noto Serif SC。限定范围后，汉字只会命中中文字体
+ */
+const LATIN_RANGE =
+  'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD'
+
+/** 中文：每片覆盖一段 unicode-range；英文正文 / 标题：单文件 + 拉丁范围 */
 const FACES: Face[] = [
   ...ZH_SLICES.map((slice) => ({
     family: 'Noto Serif SC',
@@ -22,8 +29,18 @@ const FACES: Face[] = [
     file: `zh/${slice.file}`,
     unicodeRange: slice.range,
   })),
-  { family: 'Cormorant Garamond', weight: '500', file: 'cormorant-garamond-500.woff2' },
-  { family: 'Pirata One', weight: '500', file: 'pirata-one-400.woff2' },
+  {
+    family: 'Cormorant Garamond',
+    weight: '500',
+    file: 'cormorant-garamond-500.woff2',
+    unicodeRange: LATIN_RANGE,
+  },
+  {
+    family: 'Pirata One',
+    weight: '500',
+    file: 'pirata-one-400.woff2',
+    unicodeRange: LATIN_RANGE,
+  },
 ]
 
 const CONCURRENCY = 6
