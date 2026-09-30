@@ -16,8 +16,9 @@ const { isDark } = useTheme()
 const themName = computed(() => profile.side('them').nickname || 'S')
 
 function toggleTheme(): void {
-  settings.updateUi({ theme: isDark.value ? 'light' : 'dark' })
-  ui.toast(isDark.value ? '已切换到浅色' : '已切换到深色')
+  const next = isDark.value ? 'light' : 'dark'
+  settings.updateUi({ theme: next })
+  ui.toast(next === 'dark' ? '已切换到深色' : '已切换到浅色')
 }
 
 </script>
