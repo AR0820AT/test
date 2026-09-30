@@ -22,10 +22,11 @@ const pct = computed(() => Math.max(0, Math.min(100, Math.round(props.progress))
 </template>
 
 <style scoped>
+/* 必须压过锁屏（z-index 1000）与抽屉（700），否则会被它们盖住 */
 .splash {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 5000;
   display: flex;
   align-items: center;
   justify-content: center;

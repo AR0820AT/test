@@ -122,14 +122,15 @@ onMounted(async () => {
       <span class="blob blob-c" />
     </div>
 
-    <template v-if="lock.unlocked">
+    <!-- 字体没加载完之前不渲染任何内容，避免先闪一下系统字体的锁屏 -->
+    <template v-if="!booting && lock.unlocked">
       <NavBar />
       <ChatView />
       <SettingsDrawer />
     </template>
 
     <transition name="lock">
-      <LockScreen v-if="!lock.unlocked" />
+      <LockScreen v-if="!booting && !lock.unlocked" />
     </transition>
 
     <ToastHost />
