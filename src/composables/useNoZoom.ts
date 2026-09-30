@@ -1,30 +1,15 @@
 /**
- * 禁止双击放大与双指缩放
- * iOS Safari 会无视 viewport 里的 user-scalable=no，只能用事件兜底
+ * 禁止双指捏合缩放与手势缩放
+ *
+ * 注意：这里绝不能对「单指 touchstart」调用 preventDefault —— 一旦阻止，浏览器就不会再补发
+ * click，快速连点同一个键（比如密码里的重复数字）时，第二次之后的点击会被整个吞掉，
+ * 表现为「点了几下但只输入了一两位」。防双击放大交给 CSS 的 touch-action: manipulation
+ * （base.css 的 body 上已设置，会沿祖先链对子元素生效）
  */
-const DOUBLE_TAP_MS = 320
-const DOUBLE_TAP_DISTANCE = 40
-
 export function installNoZoom(): () => void {
-  let lastTime = 0
-  let lastX = 0
-  let lastY = 0
-
   function onTouchStart(event: TouchEvent): void {
-    // 双指：直接挡掉，避免捏合缩放
-    if (event.touches.length > 1) {
-      event.preventDefault()
-      return
-    }
-    const touch = event.touches[0]
-    if (!touch) return
-    const now = Date.now()
-    const near = Math.abs(touch.clientX - lastX) < DOUBLE_TAP_DISTANCE && Math.abs(touch.clientY - lastY) < DOUBLE_TAP_DISTANCE
-    // 同一位置连续点两下：挡掉第二次，浏览器就不会放大
-    if (now - lastTime < DOUBLE_TAP_MS && near) event.preventDefault()
-    lastTime = now
-    lastX = touch.clientX
-    lastY = touch.clientY
+    // 只挡多指：捏合缩放
+    if (event.touches.length > 1) event.preventDefault()
   }
 
   /** iOS 的手势事件（gesturestart 等） */

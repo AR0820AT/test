@@ -11,25 +11,50 @@ const wrong = ref(false)
 
 const dots = computed(() => Array.from({ length: 4 }, (_, index) => index < code.value.length))
 
+let wrongTimer = 0
+
+/** 清空并结束「错误抖动」状态 */
+function resetWrong(): void {
+  window.clearTimeout(wrongTimer)
+  code.value = ''
+  wrong.value = false
+}
+
 function submit(): void {
   if (lock.tryUnlock(code.value)) return
   wrong.value = true
   if (navigator.vibrate) navigator.vibrate(28)
-  window.setTimeout(() => {
-    code.value = ''
-    wrong.value = false
-  }, 420)
+  wrongTimer = window.setTimeout(resetWrong, 420)
 }
 
 function press(key: string): void {
-  if (wrong.value) return
+  // 上一组错了正在抖动：直接开始新的一组，不把手上这一下丢掉
+  if (wrong.value) resetWrong()
   if (key === 'del') {
     code.value = code.value.slice(0, -1)
     return
   }
   if (!key || code.value.length >= 4) return
   code.value += key
-  if (code.value.length === 4) window.setTimeout(submit, 150)
+  if (code.value.length === 4) {
+    // 让第 4 个圆点先画出来再校验：两帧约 33ms，原来的 150ms 会明显拖慢手感
+    requestAnimationFrame(() => requestAnimationFrame(submit))
+  }
+}
+
+/** 最近一次由按下指针触发的输入时间，用来避免同一次点按被 click 再算一遍 */
+let lastPointerAt = 0
+
+/** 手指按下的瞬间就响应；click 在 iOS 上要多等一拍，还可能被缩放逻辑吞掉 */
+function onPointerDown(key: string): void {
+  lastPointerAt = Date.now()
+  press(key)
+}
+
+/** 键盘操作（Enter/空格）和不支持指针事件的浏览器兜底 */
+function onClick(key: string): void {
+  if (Date.now() - lastPointerAt < 700) return
+  press(key)
 }
 </script>
 
@@ -44,7 +69,15 @@ function press(key: string): void {
     <div class="pad">
       <template v-for="(key, index) in KEYS" :key="index">
         <span v-if="!key" class="spacer" />
-        <button v-else class="key" :class="{ fn: key === 'del' }" :aria-label="key === 'del' ? '删除' : key" @click="press(key)">
+        <button
+          v-else
+          type="button"
+          class="key"
+          :class="{ fn: key === 'del' }"
+          :aria-label="key === 'del' ? '删除' : key"
+          @pointerdown="onPointerDown(key)"
+          @click="onClick(key)"
+        >
           <Icon v-if="key === 'del'" name="undo" :size="22" />
           <template v-else>{{ key }}</template>
         </button>
@@ -125,14 +158,18 @@ function press(key: string): void {
   place-items: center;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   color: #fff;
   /* 数字用宋体字形，避免花体导致认错键 */
   font-family: var(--font-zh);
   font-size: 28px;
   font-weight: 500;
+  /* 数字键不加毛玻璃：12 层 backdrop-filter 在手机上很吃合成，点按会明显发钝 */
   transition: background 0.14s ease, transform 0.1s ease;
+  /* 连点不选中、不弹长按菜单，也不用等浏览器的双击判定 */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 .key:active {
