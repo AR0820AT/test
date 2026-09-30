@@ -60,11 +60,26 @@ function encodePng(size, rgba) {
 
 /* ---------------- 绘制 ---------------- */
 
-/* 暗红 → 黑 的渐变底色，与界面主色调一致 */
-const RED_A = [150, 32, 44]
-const RED_B = [12, 8, 9]
-const WHITE = [255, 255, 255]
-const ACCENT = [176, 40, 54]
+/* 纯渐变底色：左上白 → 右下蓝（vivid 蓝 #2f6fd0），中间加一档浅蓝让过渡更匀 */
+const GRADIENT = [
+  { at: 0, color: [255, 255, 255] },
+  { at: 0.55, color: [175, 206, 244] },
+  { at: 1, color: [47, 111, 208] },
+]
+
+/** 按位置取渐变色 */
+function gradientAt(t) {
+  const clamped = Math.min(Math.max(t, 0), 1)
+  for (let i = 1; i < GRADIENT.length; i += 1) {
+    const prev = GRADIENT[i - 1]
+    const next = GRADIENT[i]
+    if (clamped <= next.at) {
+      const ratio = (clamped - prev.at) / (next.at - prev.at)
+      return prev.color.map((from, c) => Math.round(from + (next.color[c] - from) * ratio))
+    }
+  }
+  return GRADIENT[GRADIENT.length - 1].color
+}
 
 function paint(px, size, x, y, color) {
   if (x < 0 || y < 0 || x >= size || y >= size) return
@@ -98,39 +113,8 @@ function fillRoundRect(px, size, x0, y0, x1, y1, radius, colorAt) {
   }
 }
 
-function fillTriangle(px, size, ax, ay, bx, by, cx, cy, color) {
-  const minX = Math.floor(Math.min(ax, bx, cx))
-  const maxX = Math.ceil(Math.max(ax, bx, cx))
-  const minY = Math.floor(Math.min(ay, by, cy))
-  const maxY = Math.ceil(Math.max(ay, by, cy))
-  const area = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy)
-  if (area === 0) return
-  for (let y = minY; y <= maxY; y += 1) {
-    for (let x = minX; x <= maxX; x += 1) {
-      const wa = ((by - cy) * (x - cx) + (cx - bx) * (y - cy)) / area
-      const wb = ((cy - ay) * (x - cx) + (ax - cx) * (y - cy)) / area
-      const wc = 1 - wa - wb
-      if (wa >= -0.001 && wb >= -0.001 && wc >= -0.001) paint(px, size, x, y, color)
-    }
-  }
-}
-
-function fillCircle(px, size, cx, cy, radius, color) {
-  const left = Math.floor(cx - radius)
-  const right = Math.ceil(cx + radius)
-  const top = Math.floor(cy - radius)
-  const bottom = Math.ceil(cy + radius)
-  for (let y = top; y <= bottom; y += 1) {
-    for (let x = left; x <= right; x += 1) {
-      const dx = x - cx
-      const dy = y - cy
-      if (dx * dx + dy * dy <= radius * radius) paint(px, size, x, y, color)
-    }
-  }
-}
-
 /**
- * 图标内容以 192x192 为设计稿，按比例缩放到目标尺寸
+ * 画整张图标：从左上角到右下角的渐变铺满整块，不带任何图案
  * @param {number} size 输出边长
  * @param {{ maskable?: boolean }} options
  */
@@ -138,48 +122,11 @@ function drawIcon(size, options = {}) {
   const maskable = Boolean(options.maskable)
   const px = new Uint8Array(size * size * 4)
 
-  // 背景：左上到右下渐变；maskable 不留圆角，保证任意裁切都铺满
+  // 只有背景：左上白 → 右下蓝；maskable 不留圆角，保证任意裁切都铺满
   const radius = maskable ? 0 : (42 / 192) * size
   fillRoundRect(px, size, 0, 0, size, size, radius, (x, y) => {
     const t = (x / size + y / size) / 2
-    return [
-      Math.round(RED_A[0] + (RED_B[0] - RED_A[0]) * t),
-      Math.round(RED_A[1] + (RED_B[1] - RED_A[1]) * t),
-      Math.round(RED_A[2] + (RED_B[2] - RED_A[2]) * t),
-      255,
-    ]
-  })
-
-  const scale = ((maskable ? 0.68 : 0.86) * size) / 192
-  const offset = (size - 192 * scale) / 2
-  const px192 = (value) => offset + value * scale
-
-  // 白色气泡本体
-  fillRoundRect(
-    px,
-    size,
-    px192(44),
-    px192(44),
-    px192(148),
-    px192(116),
-    (18 / 192) * size,
-    WHITE,
-  )
-  // 气泡尾巴
-  fillTriangle(
-    px,
-    size,
-    px192(62),
-    px192(106),
-    px192(62),
-    px192(138),
-    px192(94),
-    px192(106),
-    WHITE,
-  )
-  // 三个输入点
-  ;[70, 96, 122].forEach((cx) => {
-    fillCircle(px, size, px192(cx), px192(80), (8 / 192) * size, ACCENT)
+    return [...gradientAt(t), 255]
   })
 
   return px

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Icon from '@/components/ui/Icon.vue'
-import { brain } from '@/engine/brain'
 import { useCardStore } from '@/stores/useCardStore'
 import { useChatStore } from '@/stores/useChatStore'
 import { useLockStore } from '@/stores/useLockStore'
@@ -18,6 +17,25 @@ function lockScreen(): void {
   lock.lock()
   ui.closeDrawer()
   ui.toast('已锁定')
+}
+
+/**
+ * 硬刷新：注销 Service Worker + 清空缓存后再重新加载
+ * 加到主屏幕后（PWA 独立窗口）没有地址栏可拉刷新，只能靠这个按钮拿最新版本
+ */
+async function reloadApp(): Promise<void> {
+  ui.toast('正在重新加载…')
+  try {
+    const registration = await navigator.serviceWorker?.getRegistration()
+    await registration?.unregister()
+    const keys = await caches.keys()
+    await Promise.all(keys.map((key) => caches.delete(key)))
+  } catch {
+    // 浏览器不支持缓存 API 也无所谓，照样刷新
+  }
+  const url = new URL(window.location.href)
+  url.searchParams.set('_r', String(Date.now()))
+  window.location.replace(url.toString())
 }
 
 interface Entry {
@@ -50,7 +68,10 @@ const entries = computed<Entry[]>(() => [
       </button>
     </section>
 
-    <button class="btn primary block" @click="brain.drawNow()">戳戳对方</button>
+    <button class="btn primary block row" @click="reloadApp()">
+      <Icon name="refresh" :size="18" />
+      刷新页面
+    </button>
     <button class="btn block" @click="lockScreen()">立即锁定屏幕</button>
 
     <p class="muted">
@@ -104,5 +125,12 @@ const entries = computed<Entry[]>(() => [
   font-size: var(--fs-sm);
   color: var(--text-2);
   margin-top: 1px;
+}
+
+.btn.row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 </style>
